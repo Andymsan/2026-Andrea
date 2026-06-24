@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>2026 — Mi Año</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 :root{
@@ -104,8 +106,13 @@ section{padding:56px 20px;border-top:.5px solid var(--border);}
 .cal-dot.bike{background:var(--blue);}
 .cal-dot.strength{background:var(--purple);}
 .cal-day-label{font-size:8px;color:var(--muted);line-height:1.3;margin-top:2px;display:block;}
-.cal-legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;}
+.cal-day.done-day{border-color:rgba(63,168,122,.4);background:rgba(63,168,122,.05);}
+.cal-day.race-day{border-color:var(--accent);background:rgba(240,112,64,.08);}
+.cal-day-label{font-size:8px;color:var(--text);line-height:1.3;margin-top:2px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cal-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;}
 .cal-leg-item{display:flex;align-items:center;gap:5px;font-family:var(--fm);font-size:10px;color:var(--muted);}
+/* map */
+.leaflet-container{border-radius:var(--rl);}
 
 /* YEAR TIMELINE */
 .year-track{display:flex;flex-direction:column;gap:4px;}
@@ -526,7 +533,7 @@ footer .fr{font-family:var(--fd);font-size:16px;font-weight:700;color:var(--acce
 <section id="mapas">
   <p class="sec-label">Mapas de rutas</p>
   <h2 class="sec-title">Conoce el terreno</h2>
-  <p class="sec-desc">Estudia las rutas antes del día de carrera.</p>
+  <p class="sec-desc">Estudia la ruta antes del día de carrera.</p>
 
   <div class="tabs">
     <button class="tab-btn active" onclick="sw('mapas','maraton',this)">Medio Maratón CDMX</button>
@@ -539,36 +546,33 @@ footer .fr{font-family:var(--fd);font-size:16px;font-weight:700;color:var(--acce
       <div class="mi-stats">
         <span class="mi-stat">Distancia <span>21.1 km</span></span>
         <span class="mi-stat">Fecha <span>12 jul 2026</span></span>
-        <span class="mi-stat">Altitud <span>~2,240 m</span></span>
-        <span class="mi-stat">Salida <span>Museo Nacional de Antropología</span></span>
+        <span class="mi-stat">Salida <span>Monumento a la Revolución</span></span>
+        <span class="mi-stat">Meta <span>Reforma / Polanco</span></span>
       </div>
     </div>
-    <div class="map-container">
-      <iframe
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15054.186!2d-99.196!3d19.426!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85d201fa32e4b019%3A0xe8e43f2c82b0b7e4!2sMuseo%20Nacional%20de%20Antropolog%C3%ADa%2C%20Ciudad%20de%20M%C3%A9xico!5e0!3m2!1ses!2smx!4v1234567890"
-        height="300" allowfullscreen="" loading="lazy">
-      </iframe>
+    <!-- Mapa interactivo con ruta trazada -->
+    <div class="map-container" style="position:relative;">
+      <div id="map-maraton" style="width:100%;height:340px;border-radius:var(--rl);"></div>
     </div>
-    <p style="font-size:11px;color:var(--muted);margin-top:8px;">La ruta oficial pasa por Paseo de la Reforma, Bosque de Chapultepec y Polanco. Verifica la ruta exacta en el sitio oficial del evento cuando se publique.</p>
+    <!-- Puntos clave de la ruta -->
+    <div style="margin-top:12px;display:flex;flex-direction:column;gap:4px;" id="route-points-maraton"></div>
+    <p style="font-size:11px;color:var(--muted);margin-top:10px;">Ruta basada en el mapa oficial de Quiero Run 2026. Pasa por Reforma, Chapultepec, Lomas, Bosque de Chapultepec 3a sección y regresa por Polanco.</p>
   </div>
 
   <div class="tab-pane" id="mapas-duatlon">
     <div class="map-info">
       <p class="mi-title">Duatlón Texcoco</p>
       <div class="mi-stats">
-        <span class="mi-stat">Formato <span>5k + 20k + 2.5k</span></span>
+        <span class="mi-stat">Formato <span>5k + 20k bici + 2.5k</span></span>
         <span class="mi-stat">Fecha <span>Octubre 2026</span></span>
         <span class="mi-stat">Ubicación <span>Lago de Texcoco, EDOMEX</span></span>
         <span class="mi-stat">Terreno <span>Plano / pavimento</span></span>
       </div>
     </div>
     <div class="map-container">
-      <iframe
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d30000!2d-98.88!3d19.52!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85d1f0a90e82b4d7%3A0x1234!2sLago%20de%20Texcoco!5e0!3m2!1ses!2smx!4v1234567890"
-        height="300" allowfullscreen="" loading="lazy">
-      </iframe>
+      <div id="map-duatlon" style="width:100%;height:300px;border-radius:var(--rl);"></div>
     </div>
-    <p style="font-size:11px;color:var(--muted);margin-top:8px;">Zona de Texcoco, terreno plano ideal para el segmento de bici. Confirma la ruta exacta cuando el organizador la publique.</p>
+    <p style="font-size:11px;color:var(--muted);margin-top:10px;">⏳ La ruta oficial del Duatlón Texcoco aún no ha sido publicada. El mapa muestra la zona general del evento. Cuando salga la ruta oficial te la agrego.</p>
   </div>
 </section>
 
@@ -804,13 +808,99 @@ function loadPageEdits(){
 loadPageEdits();
 
 // ---- CALENDAR ----
-let calYear=2026, calMonth=5; // 0-indexed, 5=June
+let calYear=2026, calMonth=5;
 const MONTHS_ES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const DOW_ES=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
+// Pre-loaded training plan — maratón + duatlón
+const PLAN_WORKOUTS = {
+  // ── MARATÓN (Jun 24 – Jul 12) ──
+  '2026-06-24':{types:['run'],label:'Descanso activo'},
+  '2026-06-25':{types:['run'],label:'⚡ Velocidad ~10km'},
+  '2026-06-27':{types:['run'],label:'5km Z2'},
+  '2026-06-28':{types:['run'],label:'⭐ 16km Z2 long run'},
+  '2026-06-30':{types:['run'],label:'8km Z2'},
+  '2026-07-03':{types:['run'],label:'⚡ Velocidad ~7km'},
+  '2026-07-05':{types:['run'],label:'5km Z2'},
+  '2026-07-07':{types:['run'],label:'3km Z2'},
+  '2026-07-08':{types:['run'],label:'2km + strides'},
+  '2026-07-12':{types:['run'],label:'🏅 MARATÓN 21.1km'},
+  // ── TRANSICIÓN Y BASE DUATLÓN (Jul 14 – Jul 31) ──
+  '2026-07-14':{types:['run'],label:'Recuperación 4km'},
+  '2026-07-16':{types:['run'],label:'5km Z2'},
+  '2026-07-18':{types:['run'],label:'5km Z2'},
+  '2026-07-19':{types:['bike'],label:'🚴 Bici 20min (inicio)'},
+  '2026-07-21':{types:['run'],label:'6km Z2'},
+  '2026-07-22':{types:['bike'],label:'🚴 Bici 25min'},
+  '2026-07-24':{types:['run'],label:'6km Z2'},
+  '2026-07-26':{types:['bike'],label:'🚴 Bici 30min'},
+  '2026-07-28':{types:['run'],label:'8km Z2'},
+  '2026-07-30':{types:['run','bike'],label:'🧱 Ladrillo bici+run'},
+  // ── DUATLÓN FASE 1 — BASE (Ago 1–21) ──
+  '2026-08-02':{types:['run'],label:'5km Z2'},
+  '2026-08-03':{types:['bike'],label:'🚴 Bici 35min Z2'},
+  '2026-08-04':{types:['run'],label:'6km intervalos'},
+  '2026-08-06':{types:['bike'],label:'🚴 Bici 30min'},
+  '2026-08-07':{types:['run'],label:'8km Z2'},
+  '2026-08-09':{types:['run'],label:'5km + fuerza'},
+  '2026-08-10':{types:['bike'],label:'🚴 Bici 35min'},
+  '2026-08-11':{types:['run'],label:'6km intervalos'},
+  '2026-08-13':{types:['run','bike'],label:'🧱 Ladrillo: bici25+run3'},
+  '2026-08-14':{types:['run'],label:'10km Z2'},
+  '2026-08-16':{types:['run'],label:'6km Z2'},
+  '2026-08-17':{types:['bike'],label:'🚴 Bici 40min'},
+  '2026-08-18':{types:['run'],label:'6km intervalos'},
+  '2026-08-20':{types:['run','bike'],label:'🧱 Ladrillo: bici30+run3.5'},
+  '2026-08-21':{types:['run'],label:'12km Z2'},
+  // ── DUATLÓN FASE 2 — CONSTRUCCIÓN (Ago 23–Sep 20) ──
+  '2026-08-23':{types:['run'],label:'6km Z2'},
+  '2026-08-24':{types:['bike'],label:'🚴 Bici 45min + intervalos'},
+  '2026-08-25':{types:['run'],label:'⚡ 5×800m a 5:40'},
+  '2026-08-27':{types:['run','bike'],label:'🧱 Ladrillo: bici40+run3.5'},
+  '2026-08-28':{types:['run'],label:'13km Z2'},
+  '2026-08-30':{types:['run'],label:'5km ritmo carrera'},
+  '2026-08-31':{types:['bike'],label:'🚴 Bici 50min Z2'},
+  '2026-09-01':{types:['run'],label:'Fuerza + 4km'},
+  '2026-09-03':{types:['run','bike'],label:'🧱 LADRILLO COMPLETO 5k+20k+2k'},
+  '2026-09-05':{types:['run'],label:'6km Z2'},
+  '2026-09-07':{types:['bike'],label:'🚴 Bici 50min'},
+  '2026-09-08':{types:['run'],label:'⚡ 5×800m'},
+  '2026-09-10':{types:['run','bike'],label:'🧱 Ladrillo completo'},
+  '2026-09-12':{types:['run'],label:'14km Z2'},
+  '2026-09-14':{types:['run'],label:'6km Z2'},
+  '2026-09-15':{types:['bike'],label:'🚴 Bici 55min'},
+  '2026-09-17':{types:['run'],label:'⚡ Intervalos'},
+  '2026-09-19':{types:['run','bike'],label:'🧱 Ladrillo completo'},
+  '2026-09-20':{types:['run'],label:'14km Z2'},
+  // ── DUATLÓN FASE 3 — PEAK (Sep 22–Oct 4) ──
+  '2026-09-22':{types:['run'],label:'6km Z2'},
+  '2026-09-23':{types:['bike'],label:'🚴 Bici 60min intervalos'},
+  '2026-09-24':{types:['run'],label:'⚡ 6×1km a 5:40'},
+  '2026-09-26':{types:['run','bike'],label:'🏁 SIMULACRO 5k+20k+2.5k'},
+  '2026-09-28':{types:['run'],label:'5km Z2'},
+  '2026-09-29':{types:['bike'],label:'🚴 Bici 60min'},
+  '2026-10-01':{types:['run'],label:'Fuerza + 5km'},
+  '2026-10-03':{types:['run','bike'],label:'🏁 SIMULACRO FINAL'},
+  // ── DUATLÓN FASE 4 — TAPER (Oct 5–15) ──
+  '2026-10-06':{types:['run'],label:'4km Z2'},
+  '2026-10-07':{types:['bike'],label:'🚴 Bici 30min suave'},
+  '2026-10-08':{types:['run'],label:'3km + strides'},
+  '2026-10-10':{types:['run','bike'],label:'🧱 Mini ladrillo'},
+  '2026-10-12':{types:['run'],label:'2km Z2'},
+  '2026-10-13':{types:['run'],label:'2km + strides'},
+  '2026-10-15':{types:['run','bike'],label:'🏅 DUATLÓN TEXCOCO'},
+};
+
 function getCalWorkouts(){
-  return JSON.parse(localStorage.getItem('calWorkouts2026')||'{}');
+  const saved=JSON.parse(localStorage.getItem('calWorkouts2026')||'{}');
+  // Merge plan (plan is base, user marks override)
+  const merged={};
+  Object.entries(PLAN_WORKOUTS).forEach(([k,v])=>{ merged[k]=v.types; });
+  Object.entries(saved).forEach(([k,v])=>{ merged[k]=v; });
+  return merged;
 }
+
+function getPlanLabel(key){ return PLAN_WORKOUTS[key]?PLAN_WORKOUTS[key].label:null; }
 
 function renderCalendar(){
   const title=document.getElementById('cal-title');
@@ -827,25 +917,39 @@ function renderCalendar(){
   const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
   const today=new Date();
   const workouts=getCalWorkouts();
+  const userDone=JSON.parse(localStorage.getItem('calDone2026')||'{}');
 
   for(let i=0;i<firstDay;i++){
-    const el=document.createElement('div');
-    el.className='cal-day empty';
-    grid.appendChild(el);
+    const el=document.createElement('div');el.className='cal-day empty';grid.appendChild(el);
   }
   for(let d=1;d<=daysInMonth;d++){
     const el=document.createElement('div');
     const key=calYear+'-'+(calMonth+1).toString().padStart(2,'0')+'-'+d.toString().padStart(2,'0');
     const isToday=(today.getFullYear()===calYear&&today.getMonth()===calMonth&&today.getDate()===d);
     const wo=workouts[key]||[];
-    el.className='cal-day'+(isToday?' today':'')+(wo.length?' has-workout':'');
+    const done=userDone[key];
+    const isRace=(key==='2026-07-12'||key==='2026-10-15');
+    el.className='cal-day'+(isToday?' today':'')+(wo.length?' has-workout':'')+(done?' done-day':'')+(isRace?' race-day':'');
     el.innerHTML='<div class="cdn">'+d+'</div>';
-    if(wo.length){
+    const label=getPlanLabel(key);
+    if(label){
+      const lb=document.createElement('span');
+      lb.className='cal-day-label';
+      lb.textContent=label;
+      el.appendChild(lb);
+    }
+    if(wo.length&&!label){
       wo.forEach(t=>{
         const dot=document.createElement('span');
         dot.className='cal-dot '+t;
         el.appendChild(dot);
       });
+    }
+    if(done){
+      const ck=document.createElement('span');
+      ck.style.cssText='position:absolute;top:3px;right:3px;font-size:9px;color:var(--green);';
+      ck.textContent='✓';
+      el.appendChild(ck);
     }
     el.onclick=()=>calDayClick(key,d);
     grid.appendChild(el);
@@ -853,18 +957,13 @@ function renderCalendar(){
 }
 
 function calDayClick(key,d){
-  const workouts=getCalWorkouts();
-  const current=workouts[key]||[];
-  const types=['run','bike','strength'];
-  const names={'run':'Carrera','bike':'Bici','strength':'Fuerza'};
-  const msg='Día '+d+' — '+MONTHS_ES[calMonth]+'\n\nActuales: '+(current.map(t=>names[t]).join(', ')||'ninguno')+'\n\n¿Qué tipo añadir?\n1=Carrera 2=Bici 3=Fuerza 0=Limpiar';
+  const userDone=JSON.parse(localStorage.getItem('calDone2026')||'{}');
+  const label=getPlanLabel(key)||'Sin plan';
+  const isDone=userDone[key];
+  const msg='📅 '+d+' de '+MONTHS_ES[calMonth]+'\n\n'+label+'\n\n¿Qué quieres hacer?\n1 = Marcar como ✓ completado\n2 = Desmarcar\n0 = Cancelar';
   const r=prompt(msg);
-  if(r===null)return;
-  if(r==='0'){delete workouts[key];}
-  else if(r==='1'&&!current.includes('run'))workouts[key]=[...current,'run'];
-  else if(r==='2'&&!current.includes('bike'))workouts[key]=[...current,'bike'];
-  else if(r==='3'&&!current.includes('strength'))workouts[key]=[...current,'strength'];
-  localStorage.setItem('calWorkouts2026',JSON.stringify(workouts));
+  if(r==='1'){userDone[key]=true;localStorage.setItem('calDone2026',JSON.stringify(userDone));}
+  else if(r==='2'){delete userDone[key];localStorage.setItem('calDone2026',JSON.stringify(userDone));}
   renderCalendar();
 }
 
@@ -1032,69 +1131,136 @@ function toggleLogro(id){
   if(l){l.done=!l.done;const s=JSON.parse(localStorage.getItem('logros2026')||'{}');if(l.done)s[id]=true;else delete s[id];localStorage.setItem('logros2026',JSON.stringify(s));renderLogros();}
 }
 
+// ---- MAPS ----
+let mapMaraton=null, mapDuatlon=null;
+
+function initMaps(){
+  // Ruta maratón CDMX — 21 puntos extraídos de los mapas de Quiero Run
+  const routeMaraton=[
+    [19.4360,-99.1509], // 1 Monumento a la Revolución (salida)
+    [19.4340,-99.1560], // 2 Reforma hacia el poniente
+    [19.4320,-99.1650], // 3 Reforma / Sevilla
+    [19.4290,-99.1750], // 4 Reforma / Diana
+    [19.4270,-99.1820], // 5 Reforma entra Chapultepec
+    [19.4258,-99.1903], // 6 Auditorio Nacional
+    [19.4170,-99.2000], // 7 Fuente de Petroleros / Polanco sur
+    [19.4120,-99.2100], // 8 Sierra Nevada / Los Alpes
+    [19.4050,-99.2180], // 9 Lomas de Chapultepec
+    [19.3980,-99.2180], // 10 Av Monte Líbano
+    [19.3920,-99.2100], // 11 Bosque Chapultepec 3a sección
+    [19.3980,-99.2000], // 12 Bosque interior
+    [19.4050,-99.1950], // 13 Av Constituyentes
+    [19.4100,-99.1870], // 14 Regreso por Chapultepec
+    [19.4090,-99.1780], // 15 Parque Rosedal area
+    [19.4150,-99.1780], // 16 Museo Nac Historia
+    [19.4170,-99.1820], // 17 Zoológico area
+    [19.4200,-99.1900], // 18 Bosque Chapultepec norte
+    [19.4260,-99.1900], // 19 Museo Antropología
+    [19.4270,-99.1800], // 20 Reforma / Antropología
+    [19.4290,-99.1710], // 21 Meta — Reforma / Polanco
+  ];
+
+  if(!mapMaraton){
+    mapMaraton=L.map('map-maraton').setView([19.4150,-99.1900],13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+      attribution:'© OpenStreetMap',maxZoom:18
+    }).addTo(mapMaraton);
+    // Draw route
+    L.polyline(routeMaraton,{color:'#f07040',weight:4,opacity:.85}).addTo(mapMaraton);
+    // Start marker
+    L.circleMarker(routeMaraton[0],{radius:9,color:'#f07040',fillColor:'#fff',fillOpacity:1,weight:3})
+      .addTo(mapMaraton).bindPopup('🏁 Salida — Monumento a la Revolución').openPopup();
+    // Finish marker
+    L.circleMarker(routeMaraton[routeMaraton.length-1],{radius:9,color:'#3fa87a',fillColor:'#fff',fillOpacity:1,weight:3})
+      .addTo(mapMaraton).bindPopup('🏅 Meta — Reforma / Polanco');
+    // Key km markers
+    [[6,'km 5 — Auditorio'],[11,'km 10 — Chapultepec 3a'],[18,'km 18 — Museo Antropología']].forEach(([i,lbl])=>{
+      L.circleMarker(routeMaraton[i],{radius:6,color:'#e8b84b',fillColor:'#e8b84b',fillOpacity:1,weight:2})
+        .addTo(mapMaraton).bindPopup(lbl);
+    });
+  }
+
+  if(!mapDuatlon){
+    mapDuatlon=L.map('map-duatlon').setView([19.5200,-98.8800],12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+      attribution:'© OpenStreetMap',maxZoom:18
+    }).addTo(mapDuatlon);
+    L.circleMarker([19.5200,-98.8800],{radius:10,color:'#5b8fff',fillColor:'#5b8fff',fillOpacity:.7,weight:2})
+      .addTo(mapDuatlon).bindPopup('📍 Lago de Texcoco — Zona del evento\n(Ruta oficial por publicar)').openPopup();
+  }
+}
+
+// Init maps when tab becomes visible
+document.querySelector('[onclick*="mapas"]') && document.querySelectorAll('[onclick*="sw(\'mapas\'"]').forEach(btn=>{
+  btn.addEventListener('click',()=>setTimeout(()=>{initMaps();if(mapMaraton)mapMaraton.invalidateSize();if(mapDuatlon)mapDuatlon.invalidateSize();},100));
+});
+setTimeout(()=>{ if(document.getElementById('map-maraton'))initMaps(); },600);
+
 // ---- STRAVA ----
 const STRAVA_CLIENT_ID = '260791';
 const STRAVA_CLIENT_SECRET = 'eba16840fbf6a2d8683c29aefe91558caf131c13';
 const STRAVA_REFRESH_TOKEN = '2fd7ee09fbd41d2ca1dfc169c33e11708cd91761';
 
-async function getStravaToken(){
-  const cached = JSON.parse(localStorage.getItem('stravaToken')||'{}');
-  if(cached.access_token && cached.expires_at && Date.now()/1000 < cached.expires_at - 60){
-    return cached.access_token;
-  }
-  try {
-    const res = await fetch('https://www.strava.com/oauth/token',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        client_id: STRAVA_CLIENT_ID,
-        client_secret: STRAVA_CLIENT_SECRET,
-        refresh_token: STRAVA_REFRESH_TOKEN,
-        grant_type: 'refresh_token'
-      })
-    });
-    const data = await res.json();
-    if(data.access_token){
-      localStorage.setItem('stravaToken', JSON.stringify(data));
-      return data.access_token;
-    }
-  } catch(e){ console.error('Token error',e); }
-  return null;
-}
+// Strava blocks CORS token refresh from static pages.
+// Solution: user pastes a fresh access token from strava.com/settings/api (lasts 6h)
+// or we use the stored one if still valid.
 
 async function cargarStrava(){
-  const status = document.getElementById('strava-status');
-  const actDiv = document.getElementById('strava-activities');
-  status.textContent = 'Conectando con Strava...';
-  status.style.color = 'var(--muted)';
-  const token = await getStravaToken();
-  if(!token){
-    status.textContent = '⚠️ No se pudo obtener el token. El refresh token puede haber expirado — vuelve a autorizarlo en strava.com/settings/api.';
-    status.style.color = 'var(--accent)';
+  const status=document.getElementById('strava-status');
+  const actDiv=document.getElementById('strava-activities');
+  // Try stored token first
+  let token=localStorage.getItem('stravaAccessToken');
+  const exp=parseInt(localStorage.getItem('stravaTokenExp')||'0');
+  if(!token||Date.now()/1000>exp){
+    // Show manual token input
+    status.innerHTML='⚠️ El token de Strava expiró (duran 6h). <br><br>Para actualizar:<br>1. Ve a <a href="https://www.strava.com/settings/api" target="_blank" style="color:var(--accent)">strava.com/settings/api</a><br>2. Copia el "Token de acceso"<br>3. Pégalo aquí: <input id="strava-token-input" type="text" placeholder="pega tu token aquí" style="background:var(--surface2);border:.5px solid var(--border-bright);border-radius:4px;color:var(--text);font-family:var(--fm);font-size:11px;padding:4px 8px;margin-top:6px;width:100%;display:block;outline:none;"> <button onclick="setStravaToken()" class="btn-save" style="margin-top:6px;">Activar</button>';
+    status.style.color='var(--muted)';
     return;
   }
-  try {
-    const res = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=10&page=1',{
-      headers:{ 'Authorization': 'Bearer '+token }
+  await fetchStravaActivities(token);
+}
+
+function setStravaToken(){
+  const inp=document.getElementById('strava-token-input');
+  if(!inp||!inp.value.trim())return;
+  const t=inp.value.trim();
+  localStorage.setItem('stravaAccessToken',t);
+  localStorage.setItem('stravaTokenExp',Math.floor(Date.now()/1000)+21600); // 6h
+  fetchStravaActivities(t);
+}
+
+async function fetchStravaActivities(token){
+  const status=document.getElementById('strava-status');
+  const actDiv=document.getElementById('strava-activities');
+  status.textContent='Cargando actividades...';
+  status.style.color='var(--muted)';
+  try{
+    const res=await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=10&page=1',{
+      headers:{'Authorization':'Bearer '+token}
     });
-    const acts = await res.json();
-    if(!Array.isArray(acts)||acts.length===0){
-      status.textContent = '✓ Conectado. Sin actividades recientes.';
-      status.style.color = 'var(--green)';
+    if(res.status===401){
+      localStorage.removeItem('stravaAccessToken');
+      status.innerHTML='⚠️ Token inválido. <a href="https://www.strava.com/settings/api" target="_blank" style="color:var(--accent)">Copia un token nuevo de Strava ↗</a> y recarga la página.';
+      status.style.color='var(--accent)';
       return;
     }
-    status.textContent = '✓ Conectado — '+acts.length+' actividades cargadas';
-    status.style.color = 'var(--green)';
-    const typeIcon = {Run:'🏃',Ride:'🚴',Walk:'🚶',Hike:'🥾',Swim:'🏊'};
-    const typeColor = {Run:'run',Ride:'bike',Walk:'run',Hike:'run',Swim:'str'};
-    actDiv.innerHTML = acts.map(a => {
-      const d = new Date(a.start_date_local);
-      const fecha = d.toLocaleDateString('es-MX',{day:'numeric',month:'short'});
-      const dist = a.distance > 0 ? (a.distance/1000).toFixed(1)+' km' : '—';
-      const dur = a.moving_time > 0 ? Math.floor(a.moving_time/60)+' min' : '—';
-      const pace = (a.type==='Run'&&a.distance>0&&a.moving_time>0)
-        ? (() => { const pm=a.moving_time/60/(a.distance/1000); const m=Math.floor(pm); const s=Math.round((pm-m)*60); return m+':'+(s<10?'0':'')+s+' /km'; })()
-        : '';
+    const acts=await res.json();
+    if(!Array.isArray(acts)||acts.length===0){
+      status.textContent='✓ Conectado. Sin actividades recientes.';
+      status.style.color='var(--green)';
+      return;
+    }
+    status.textContent='✓ '+acts.length+' actividades cargadas desde Strava';
+    status.style.color='var(--green)';
+    const typeIcon={Run:'🏃',Ride:'🚴',Walk:'🚶',Hike:'🥾',Swim:'🏊'};
+    const typeColor={Run:'run',Ride:'bike',Walk:'run',Hike:'run',Swim:'str'};
+    actDiv.innerHTML=acts.map(a=>{
+      const d=new Date(a.start_date_local);
+      const fecha=d.toLocaleDateString('es-MX',{day:'numeric',month:'short'});
+      const dist=a.distance>0?(a.distance/1000).toFixed(1)+' km':'—';
+      const dur=a.moving_time>0?Math.floor(a.moving_time/60)+' min':'—';
+      const pace=(a.type==='Run'&&a.distance>0&&a.moving_time>0)?
+        (()=>{const pm=a.moving_time/60/(a.distance/1000);const m=Math.floor(pm);const s=Math.round((pm-m)*60);return m+':'+(s<10?'0':'')+s+' /km';})():'';
       return `<div class="recent-item">
         <div class="ri-type ${typeColor[a.type]||'run'}">${typeIcon[a.type]||'🏃'}</div>
         <div class="ri-info">
@@ -1104,51 +1270,35 @@ async function cargarStrava(){
         <a href="https://www.strava.com/activities/${a.id}" target="_blank" style="font-size:11px;color:var(--accent);text-decoration:none;flex-shrink:0;">ver ↗</a>
       </div>`;
     }).join('');
-
-    // Auto-import into local registro if not already saved
-    const registros = JSON.parse(localStorage.getItem('registros2026')||'[]');
-    const existingIds = new Set(registros.map(r=>r.stravaId).filter(Boolean));
-    let added = 0;
-    acts.forEach(a => {
+    // Auto-import to registro
+    const registros=JSON.parse(localStorage.getItem('registros2026')||'[]');
+    const existingIds=new Set(registros.map(r=>r.stravaId).filter(Boolean));
+    let added=0;
+    acts.forEach(a=>{
       if(!existingIds.has(a.id)){
         const typeMap={Run:'run',Ride:'bike',Walk:'walk',Hike:'walk',Swim:'str'};
-        const fecha = a.start_date_local.split('T')[0];
-        registros.unshift({
-          id: Date.now()+Math.random(),
-          stravaId: a.id,
-          fecha,
-          tipo: typeMap[a.type]||'run',
-          dist: a.distance>0 ? parseFloat((a.distance/1000).toFixed(2)) : 0,
-          tiempo: a.moving_time>0 ? Math.floor(a.moving_time/60) : 0,
-          ritmo: '',
-          peso: 0,
-          notas: a.name+' (Strava)'
-        });
-        // Mark calendar
-        const wo = JSON.parse(localStorage.getItem('calWorkouts2026')||'{}');
+        const fecha=a.start_date_local.split('T')[0];
+        registros.unshift({id:Date.now()+Math.random(),stravaId:a.id,fecha,tipo:typeMap[a.type]||'run',
+          dist:a.distance>0?parseFloat((a.distance/1000).toFixed(2)):0,
+          tiempo:a.moving_time>0?Math.floor(a.moving_time/60):0,
+          ritmo:'',peso:0,notas:a.name+' (Strava)'});
+        const wo=JSON.parse(localStorage.getItem('calWorkouts2026')||'{}');
         const tMap={run:'run',bike:'bike',walk:'run',str:'strength'};
-        const t = tMap[typeMap[a.type]||'run']||'run';
-        wo[fecha] = wo[fecha]||[];
-        if(!wo[fecha].includes(t)) wo[fecha].push(t);
+        const t=tMap[typeMap[a.type]||'run']||'run';
+        wo[fecha]=wo[fecha]||[];
+        if(!wo[fecha].includes(t))wo[fecha].push(t);
         localStorage.setItem('calWorkouts2026',JSON.stringify(wo));
         added++;
       }
     });
-    if(added>0){
-      localStorage.setItem('registros2026',JSON.stringify(registros));
-      renderRecent();
-      updateStats();
-      renderCalendar();
-    }
-  } catch(e){
-    status.textContent = '⚠️ Error al cargar actividades: '+e.message;
-    status.style.color = 'var(--accent)';
+    if(added>0){localStorage.setItem('registros2026',JSON.stringify(registros));renderRecent();updateStats();renderCalendar();}
+  }catch(e){
+    status.textContent='Error al conectar con Strava: '+e.message;
+    status.style.color='var(--accent)';
   }
 }
 
-function verPerfilStrava(){
-  window.open('https://www.strava.com/athletes/'+STRAVA_CLIENT_ID,'_blank');
-}
+function verPerfilStrava(){ window.open('https://www.strava.com/athletes/'+STRAVA_CLIENT_ID,'_blank'); }
 
 // ---- COUNTDOWN ----
 function updateCountdown(){
