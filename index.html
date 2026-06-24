@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 — Mi Año</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e0f0f;--surface:#161717;--surface2:#1e1f1f;
+  --border:rgba(255,255,255,0.07);--border-bright:rgba(255,255,255,0.14);
+  --text:#e8e6e0;--muted:#6e6c67;
+  --accent:#f07040;--green:#3fa87a;--blue:#5b8fff;--gold:#e8b84b;--purple:#a97fff;
+  --fd:'Syne',sans-serif;--fb:'Inter',sans-serif;--fm:'DM Mono',monospace;
+  --r:8px;--rl:12px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;}
+
+/* EDIT MODE */
+[contenteditable="true"]{outline:none;border-bottom:1px dashed rgba(240,112,64,0.5);cursor:text;}
+[contenteditable="true"]:focus{border-bottom:1px solid var(--accent);background:rgba(240,112,64,0.05);border-radius:3px;}
+.edit-bar{display:none;position:fixed;bottom:20px;right:20px;z-index:200;display:flex;gap:8px;flex-direction:column;align-items:flex-end;}
+.edit-toggle{background:var(--accent);color:#000;border:none;border-radius:40px;padding:10px 18px;font-family:var(--fm);font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 4px 20px rgba(240,112,64,.4);}
+.edit-toggle:hover{filter:brightness(1.1);}
+.edit-hint{background:var(--surface);border:0.5px solid var(--border-bright);border-radius:8px;padding:8px 14px;font-family:var(--fm);font-size:10px;color:var(--muted);max-width:220px;text-align:right;display:none;}
+.edit-hint.show{display:block;}
+.edit-save{background:var(--green);color:#000;border:none;border-radius:40px;padding:8px 16px;font-family:var(--fm);font-size:11px;font-weight:500;cursor:pointer;display:none;}
+.edit-save.show{display:flex;align-items:center;gap:6px;}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(14,15,15,0.93);backdrop-filter:blur(14px);border-bottom:.5px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:52px;}
+.nav-logo{font-family:var(--fm);font-size:13px;color:var(--accent);letter-spacing:.05em;}
+.nav-links{display:flex;gap:18px;list-style:none;}
+.nav-links a{font-size:11px;font-family:var(--fm);color:var(--muted);text-decoration:none;letter-spacing:.04em;transition:color .15s;}
+.nav-links a:hover{color:var(--text);}
+#countdown-nav{font-family:var(--fm);font-size:11px;color:var(--gold);}
+
+/* HERO */
+.hero{min-height:92vh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 28px 64px;position:relative;overflow:hidden;}
+.hero-rings{position:absolute;top:40%;right:-140px;width:560px;height:560px;opacity:.05;pointer-events:none;}
+.hero-rings circle{fill:none;stroke:var(--accent);stroke-width:.5;}
+.hero-eye{font-family:var(--fm);font-size:11px;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;margin-bottom:18px;}
+.hero-title{font-family:var(--fd);font-size:clamp(46px,10vw,110px);font-weight:800;line-height:.92;letter-spacing:-.03em;margin-bottom:28px;}
+.hero-title em{font-style:normal;color:var(--accent);}
+.hero-subtitle{font-size:14px;color:var(--muted);max-width:440px;line-height:1.7;margin-bottom:44px;}
+.hero-events{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:52px;}
+.event-pill{display:flex;align-items:center;gap:8px;padding:7px 14px;border:.5px solid var(--border-bright);border-radius:40px;font-size:12px;font-family:var(--fm);}
+.event-pill .ep-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.event-pill.run .ep-dot{background:var(--accent);}
+.event-pill.du .ep-dot{background:var(--blue);}
+.ep-date{color:var(--muted);margin-left:4px;}
+.progress-bar-wrap{position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--border);}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--gold),var(--blue));transition:width .4s;}
+
+/* STATS HERO */
+.hero-stats{display:grid;grid-template-columns:repeat(2,auto);gap:16px 40px;margin-bottom:48px;}
+@media(min-width:480px){.hero-stats{grid-template-columns:repeat(4,auto);}}
+.hs-item .num{font-family:var(--fm);font-size:26px;font-weight:500;}
+.hs-item .lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:2px;}
+
+/* SECTIONS */
+section{padding:64px 28px;border-top:.5px solid var(--border);}
+.sec-label{font-family:var(--fm);font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:36px;display:flex;align-items:center;gap:12px;}
+.sec-label::after{content:'';flex:1;height:.5px;background:var(--border);}
+.sec-title{font-family:var(--fd);font-size:clamp(24px,5vw,34px);font-weight:700;letter-spacing:-.02em;margin-bottom:8px;}
+.sec-desc{font-size:13px;color:var(--muted);margin-bottom:36px;}
+
+/* TABS */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:28px;}
+.tab-btn{padding:6px 14px;border-radius:4px;border:.5px solid var(--border-bright);background:transparent;color:var(--muted);font-family:var(--fm);font-size:11px;cursor:pointer;transition:all .15s;letter-spacing:.04em;white-space:nowrap;}
+.tab-btn:hover{color:var(--text);border-color:rgba(255,255,255,.25);}
+.tab-btn.active{background:var(--accent);color:#000;border-color:var(--accent);font-weight:500;}
+.tab-pane{display:none;}
+.tab-pane.active{display:block;}
+
+/* TIMELINE */
+.timeline{position:relative;padding-left:76px;}
+.timeline::before{content:'';position:absolute;left:38px;top:16px;bottom:16px;width:.5px;background:var(--border);}
+.tl-block{position:relative;margin-bottom:6px;min-height:52px;}
+.tl-time{position:absolute;left:-76px;width:64px;text-align:right;font-family:var(--fm);font-size:10px;color:var(--muted);padding-top:15px;letter-spacing:.03em;}
+.tl-dot{position:absolute;left:-43px;top:19px;width:10px;height:10px;border-radius:50%;border:1.5px solid var(--border-bright);background:var(--surface2);}
+.tl-dot.o{background:var(--accent);border-color:var(--accent);}
+.tl-dot.g{background:var(--green);border-color:var(--green);}
+.tl-dot.b{background:var(--blue);border-color:var(--blue);}
+.tl-dot.p{background:var(--purple);border-color:var(--purple);}
+.tl-dot.y{background:var(--gold);border-color:var(--gold);}
+.tl-card{background:var(--surface);border:.5px solid var(--border);border-radius:var(--r);padding:11px 14px;transition:border-color .15s;}
+.tl-card:hover{border-color:var(--border-bright);}
+.tl-card .nm{font-weight:500;font-size:14px;color:var(--text);margin-bottom:2px;}
+.tl-card .ds{font-size:12px;color:var(--muted);line-height:1.5;}
+.tl-tag{display:inline-block;font-family:var(--fm);font-size:10px;padding:2px 7px;border-radius:3px;margin-top:4px;letter-spacing:.03em;}
+.tt-run{background:rgba(240,112,64,.15);color:var(--accent);}
+.tt-food{background:rgba(63,168,122,.15);color:var(--green);}
+.tt-mind{background:rgba(91,143,255,.15);color:var(--blue);}
+.tt-str{background:rgba(169,127,255,.15);color:var(--purple);}
+.tt-rest{background:rgba(110,108,103,.12);color:var(--muted);}
+
+/* YEAR TIMELINE */
+.year-wrap{position:relative;}
+.year-track{display:flex;flex-direction:column;gap:4px;}
+.month-row{display:grid;grid-template-columns:80px 24px 1fr;gap:0;align-items:stretch;min-height:72px;}
+.mr-label{font-family:var(--fm);font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;padding-top:18px;text-align:right;padding-right:14px;}
+.mr-spine{display:flex;flex-direction:column;align-items:center;}
+.mr-dot{width:12px;height:12px;border-radius:50%;border:1.5px solid var(--border-bright);background:var(--surface2);margin-top:14px;flex-shrink:0;}
+.mr-dot.race{background:var(--accent);border-color:var(--accent);width:16px;height:16px;margin-top:12px;}
+.mr-dot.du{background:var(--blue);border-color:var(--blue);width:16px;height:16px;margin-top:12px;}
+.mr-dot.now{background:var(--gold);border-color:var(--gold);box-shadow:0 0 0 4px rgba(232,184,75,.2);}
+.mr-line{width:.5px;flex:1;background:var(--border);}
+.mr-content{padding:8px 0 8px 16px;}
+.month-card{background:var(--surface);border:.5px solid var(--border);border-radius:var(--r);padding:11px 14px;}
+.month-card .mc-title{font-family:var(--fd);font-size:14px;font-weight:600;margin-bottom:3px;}
+.month-card .mc-items{font-size:12px;color:var(--muted);line-height:1.7;}
+.month-card.race-c{border-color:rgba(240,112,64,.3);background:rgba(240,112,64,.04);}
+.month-card.du-c{border-color:rgba(91,143,255,.3);background:rgba(91,143,255,.04);}
+.month-card.now-c{border-color:rgba(232,184,75,.3);background:rgba(232,184,75,.04);}
+.month-empty{height:40px;}
+
+/* FUERZA */
+.str-grid{display:grid;grid-template-columns:1fr;gap:14px;}
+@media(min-width:600px){.str-grid{grid-template-columns:1fr 1fr;}}
+.str-card{background:var(--surface);border:.5px solid var(--border);border-radius:var(--rl);padding:16px 18px;}
+.str-card .sc-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.str-card .sc-icon{font-size:20px;}
+.str-card .sc-title{font-family:var(--fd);font-size:14px;font-weight:600;letter-spacing:-.01em;}
+.str-card .sc-sub{font-size:11px;color:var(--muted);font-family:var(--fm);}
+.ex-list{display:flex;flex-direction:column;gap:5px;}
+.ex-item{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:6px;font-size:12px;}
+.ex-name{color:var(--text);}
+.ex-sets{font-family:var(--fm);font-size:10px;color:var(--muted);}
+
+/* NUTRICIÓN */
+.food-grid{display:grid;grid-template-columns:1fr;gap:12px;}
+@media(min-width:600px){.food-grid{grid-template-columns:1fr 1fr;}}
+.food-card{background:var(--surface);border:.5px solid var(--border);border-radius:var(--rl);padding:16px 18px;}
+.food-card .fc-icon{font-size:20px;margin-bottom:7px;}
+.food-card .fc-title{font-family:var(--fd);font-size:14px;font-weight:600;margin-bottom:2px;letter-spacing:-.01em;}
+.food-card .fc-sub{font-size:11px;color:var(--muted);margin-bottom:12px;font-family:var(--fm);}
+.meal-row{display:flex;flex-direction:column;gap:5px;}
+.mr-item{padding:7px 10px;background:var(--surface2);border-radius:6px;font-size:12px;line-height:1.5;color:var(--muted);}
+.mr-item strong{display:block;font-size:12px;font-weight:500;color:var(--text);margin-bottom:1px;}
+.food-card.hl{border-color:rgba(232,184,75,.3);background:rgba(232,184,75,.04);}
+
+/* PROGRESO */
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:28px;}
+@media(min-width:480px){.stats-grid{grid-template-columns:repeat(3,1fr);}}
+.stat-card{background:var(--surface);border:.5px solid var(--border);border-radius:var(--rl);padding:16px 18px;}
+.stat-card .sn{font-family:var(--fm);font-size:26px;font-weight:500;color:var(--text);}
+.stat-card .sl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:2px;}
+.stat-card .ss{font-size:11px;color:var(--muted);margin-top:4px;}
+.logros-list{display:flex;flex-direction:column;gap:6px;}
+.logro-item{display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--surface);border:.5px solid var(--border);border-radius:var(--r);cursor:pointer;transition:border-color .15s;-webkit-tap-highlight-color:transparent;}
+.logro-item:hover{border-color:var(--border-bright);}
+.logro-check{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border-bright);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;}
+.logro-check.done{background:var(--green);border-color:var(--green);}
+.logro-check svg{width:11px;height:11px;stroke:#000;stroke-width:2.5;fill:none;display:none;}
+.logro-check.done svg{display:block;}
+.logro-text{flex:1;min-width:0;}
+.logro-text .ltn{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.logro-text .lts{font-size:11px;color:var(--muted);}
+.logro-tag{font-family:var(--fm);font-size:10px;color:var(--muted);white-space:nowrap;flex-shrink:0;}
+
+/* TIPS */
+.tips-grid{display:grid;grid-template-columns:1fr;gap:10px;}
+@media(min-width:600px){.tips-grid{grid-template-columns:1fr 1fr;}}
+.tip-card{background:var(--surface);border:.5px solid var(--border);border-radius:var(--r);padding:14px 16px;}
+.tip-label{font-family:var(--fm);font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+.tip-text{font-size:13px;color:var(--text);line-height:1.6;}
+
+/* FOOTER */
+footer{padding:36px 28px;border-top:.5px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+footer .fl{font-family:var(--fm);font-size:11px;color:var(--muted);}
+footer .fr{font-family:var(--fd);font-size:18px;font-weight:700;color:var(--accent);}
+
+@media(max-width:480px){
+  .nav-links{display:none;}
+  .hero-stats{grid-template-columns:1fr 1fr;}
+  .timeline{padding-left:64px;}
+  .tl-time{left:-64px;width:52px;font-size:9px;}
+  .tl-dot{left:-37px;}
+  .timeline::before{left:31px;}
+  .month-row{grid-template-columns:52px 20px 1fr;}
+  .mr-label{font-size:9px;padding-right:10px;}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-logo">2026</span>
+  <ul class="nav-links">
+    <li><a href="#rutina">Rutina</a></li>
+    <li><a href="#ano">El año</a></li>
+    <li><a href="#fuerza">Fuerza</a></li>
+    <li><a href="#nutricion">Nutrición</a></li>
+    <li><a href="#progreso">Progreso</a></li>
+  </ul>
+  <span id="countdown-nav">—</span>
+</nav>
+
+<!-- HERO -->
+<section class="hero" style="border-top:none;">
+  <svg class="hero-rings" viewBox="0 0 560 560" aria-hidden="true">
+    <circle cx="280" cy="280" r="90"/>
+    <circle cx="280" cy="280" r="160"/>
+    <circle cx="280" cy="280" r="230"/>
+    <circle cx="280" cy="280" r="270"/>
+  </svg>
+  <p class="hero-eye">Estilo de vida — 2026</p>
+  <h1 class="hero-title">
+    Correr.<br>
+    Pedalear.<br>
+    <em>Vivir bien.</em>
+  </h1>
+  <p class="hero-subtitle">Un año de dos carreras, hábitos sólidos y cuerpo entrenado. Desde las 4:30 am hasta cruzar la meta en Texcoco.</p>
+  <div class="hero-events">
+    <div class="event-pill run">
+      <span class="ep-dot"></span>
+      <span>Medio Maratón CDMX</span>
+      <span class="ep-date">12 jul</span>
+    </div>
+    <div class="event-pill du">
+      <span class="ep-dot"></span>
+      <span>Duatlón Texcoco</span>
+      <span class="ep-date">oct 2026</span>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="hs-item"><p class="num">89</p><p class="lbl">km este año</p></div>
+    <div class="hs-item"><p class="num">166</p><p class="lbl">km histórico</p></div>
+    <div class="hs-item"><p class="num">47</p><p class="lbl">carreras totales</p></div>
+    <div class="hs-item"><p class="num" id="dias-hero">—</p><p class="lbl">días al maratón</p></div>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="year-fill" style="width:0%"></div></div>
+</section>
+
+<!-- RUTINA -->
+<section id="rutina">
+  <p class="sec-label">Rutina diaria</p>
+  <h2 class="sec-title">4:30 am es la constante</h2>
+  <p class="sec-desc">Tres modos según el día. La mañana siempre empieza igual.</p>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="sw('rutina','home',this)">Home office</button>
+    <button class="tab-btn" onclick="sw('rutina','campo',this)">Trabajo de campo</button>
+    <button class="tab-btn" onclick="sw('rutina','noche',this)">Rutina de noche</button>
+  </div>
+
+  <div class="tab-pane active" id="rutina-home">
+    <div class="timeline">
+      <div class="tl-block"><span class="tl-time">4:30</span><span class="tl-dot y"></span><div class="tl-card"><p class="nm">Despertar</p><p class="ds">Sin snooze. Agua antes de cualquier otra cosa.</p><span class="tl-tag tt-mind">ritual</span></div></div>
+      <div class="tl-block"><span class="tl-time">4:35</span><span class="tl-dot g"></span><div class="tl-card"><p class="nm">Pre-desayuno</p><p class="ds">Café con leche + plátano o barrita Members Mark.</p><span class="tl-tag tt-food">combustible</span></div></div>
+      <div class="tl-block"><span class="tl-time">4:50</span><span class="tl-dot b"></span><div class="tl-card"><p class="nm">Meditación</p><p class="ds">5–10 min. Sin pantalla todavía.</p><span class="tl-tag tt-mind">mente</span></div></div>
+      <div class="tl-block"><span class="tl-time">5:00</span><span class="tl-dot b"></span><div class="tl-card"><p class="nm">Higiene matutina</p><p class="ds">Cara, dientes. Movimiento lento e intencional.</p><span class="tl-tag tt-mind">ritual</span></div></div>
+      <div class="tl-block"><span class="tl-time">5:10</span><span class="tl-dot p"></span><div class="tl-card"><p class="nm">Calistenia en casa</p><p class="ds">20–30 min. Sentadillas, flexiones, zancadas, plancha.</p><span class="tl-tag tt-str">fuerza</span></div></div>
+      <div class="tl-block"><span class="tl-time">5:45</span><span class="tl-dot"></span><div class="tl-card"><p class="nm">Preparación</p><p class="ds">Ropa, audífonos, reloj. Sin decisiones al salir.</p><span class="tl-tag tt-rest">logística</span></div></div>
+      <div class="tl-block"><span class="tl-time">6:00</span><span class="tl-dot o"></span><div class="tl-card"><p class="nm">🏃 Salida a correr o bici</p><p class="ds">El bloque más importante. Z2, velocidad, long run o ladrillo para el duatlón.</p><span class="tl-tag tt-run">entrenamiento</span></div></div>
+      <div class="tl-block"><span class="tl-time">7:30–8:00</span><span class="tl-dot g"></span><div class="tl-card"><p class="nm">Recuperación + desayuno real</p><p class="ds">Yogur Chobani + frutos rojos + avena, o huevo + papa. Dentro de 30–45 min.</p><span class="tl-tag tt-food">recuperación</span></div></div>
+      <div class="tl-block"><span class="tl-time">10:00</span><span class="tl-dot"></span><div class="tl-card"><p class="nm">Inicio de trabajo</p><p class="ds">Ya entrenaste, ya comiste. El resto del día es productivo.</p><span class="tl-tag tt-rest">trabajo</span></div></div>
+    </div>
+  </div>
+
+  <div class="tab-pane" id="rutina-campo">
+    <div class="timeline">
+      <div class="tl-block"><span class="tl-time">4:30</span><span class="tl-dot y"></span><div class="tl-card"><p class="nm">Despertar</p><p class="ds">Igual que siempre. La rutina no negocia.</p><span class="tl-tag tt-mind">ritual</span></div></div>
+      <div class="tl-block"><span class="tl-time">4:35</span><span class="tl-dot g"></span><div class="tl-card"><p class="nm">Pre-desayuno</p><p class="ds">Café + plátano. Rápido.</p><span class="tl-tag tt-food">combustible</span></div></div>
+      <div class="tl-block"><span class="tl-time">4:50</span><span class="tl-dot b"></span><div class="tl-card"><p class="nm">Meditación + higiene</p><p class="ds">Versión compacta: 5 min meditación, cara y dientes.</p><span class="tl-tag tt-mind">mente</span></div></div>
+      <div class="tl-block"><span class="tl-time">5:05</span><span class="tl-dot p"></span><div class="tl-card"><p class="nm">Calistenia rápida</p><p class="ds">15 min. Sentadillas, plancha, zancadas.</p><span class="tl-tag tt-str">fuerza</span></div></div>
+      <div class="tl-block"><span class="tl-time">5:25</span><span class="tl-dot o"></span><div class="tl-card"><p class="nm">🏃 Salida a correr</p><p class="ds">Adapta la distancia si el tiempo no alcanza, pero no canceles.</p><span class="tl-tag tt-run">entrenamiento</span></div></div>
+      <div class="tl-block"><span class="tl-time">6:50</span><span class="tl-dot g"></span><div class="tl-card"><p class="nm">Desayuno rápido</p><p class="ds">Yogur Chobani + fruta, o rice cake con peanut butter.</p><span class="tl-tag tt-food">recuperación</span></div></div>
+      <div class="tl-block"><span class="tl-time">8:00</span><span class="tl-dot"></span><div class="tl-card"><p class="nm">Salida a campo</p><p class="ds">Lleva snack: plátano, barrita o rice cake para media mañana.</p><span class="tl-tag tt-rest">logística</span></div></div>
+    </div>
+  </div>
+
+  <div class="tab-pane" id="rutina-noche">
+    <div class="timeline">
+      <div class="tl-block"><span class="tl-time">20–22h</span><span class="tl-dot"></span><div class="tl-card"><p class="nm">Llegada a casa</p><p class="ds">La rutina es igual sin importar la hora de llegada.</p><span class="tl-tag tt-rest">llegada</span></div></div>
+      <div class="tl-block"><span class="tl-time">+10 min</span><span class="tl-dot g"></span><div class="tl-card"><p class="nm">Cena ligera</p><p class="ds">Pollo o atún + verduras + papa o arroz. Si es después de las 10pm, reduce los carbohidratos.</p><span class="tl-tag tt-food">nutrición</span></div></div>
+      <div class="tl-block"><span class="tl-time">+30 min</span><span class="tl-dot p"></span><div class="tl-card"><p class="nm">Stretching 10 min</p><p class="ds">Cuádriceps, isquios, pantorrillas, cadera. Siempre los días que corriste o anduviste en bici.</p><span class="tl-tag tt-str">movilidad</span></div></div>
+      <div class="tl-block"><span class="tl-time">+45 min</span><span class="tl-dot b"></span><div class="tl-card"><p class="nm">Revisión del día</p><p class="ds">¿Corriste? ¿Comiste bien? Registra en Strava. Revisa el plan de mañana. 5 min.</p><span class="tl-tag tt-mind">planificación</span></div></div>
+      <div class="tl-block"><span class="tl-time">+60 min</span><span class="tl-dot b"></span><div class="tl-card"><p class="nm">Desconexión</p><p class="ds">Modo avión. Lectura o baño. Sin pantallas.</p><span class="tl-tag tt-mind">mente</span></div></div>
+      <div class="tl-block"><span class="tl-time">21:30–23h</span><span class="tl-dot y"></span><div class="tl-card"><p class="nm">Dormir</p><p class="ds">Meta: 7h mínimo para despertar a las 4:30 recuperada.</p><span class="tl-tag tt-rest">descanso</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- EL AÑO -->
+<section id="ano">
+  <p class="sec-label">El año</p>
+  <h2 class="sec-title">2026 en bloques</h2>
+  <p class="sec-desc">Dos carreras, cuatro fases de entrenamiento.</p>
+  <div class="year-track">
+
+    <div class="month-row">
+      <span class="mr-label">Ene–Feb</span>
+      <div class="mr-spine"><div class="mr-dot"></div><div class="mr-line"></div></div>
+      <div class="mr-content"><div class="month-card"><p class="mc-title">Base general</p><p class="mc-items">Rodar 3–4 días/semana · Calistenia constante · Establecer hábitos de sueño</p></div></div>
+    </div>
+
+    <div class="month-row">
+      <span class="mr-label">Mar–Abr</span>
+      <div class="mr-spine"><div class="mr-dot"></div><div class="mr-line"></div></div>
+      <div class="mr-content"><div class="month-card"><p class="mc-title">Construcción + velocidad</p><p class="mc-items">Aumentar km semanales · Intervalos de velocidad · Long run dominical · Fuerza 2×/semana</p></div></div>
+    </div>
+
+    <div class="month-row">
+      <span class="mr-label">May–Jun</span>
+      <div class="mr-spine"><div class="mr-dot now"></div><div class="mr-line"></div></div>
+      <div class="mr-content"><div class="month-card now-c"><p class="mc-title" style="color:var(--gold)">← Ahora: Tapering maratón</p><p class="mc-items">Long run 16 km (dom 28) · Reducir volumen · Logística de carrera lista</p></div></div>
+    </div>
+
+    <div class="month-row">
+      <span class="mr-label">Jul</span>
+      <div class="mr-spine"><div class="mr-dot race"></div><div class="mr-line"></div></div>
+      <div class="mr-content"><div class="month-card race-c"><p class="mc-title" style="color:var(--accent)">🏅 Medio Maratón CDMX — 12 jul</p><p class="mc-items">21.1 km · Recuperación activa · Inicio ciclo bici/duatlón</p></div></div>
+    </div>
+
+    <div class="month-row">
+      <span class="mr-label">Ago–Sep</span>
+      <div class="mr-spine"><div class="mr-dot"></div><div class="mr-line"></div></div>
+      <div class="mr-content"><div class="month-card"><p class="mc-title">Transición + peak duatlón</p><p class="mc-items">Bici como bloque principal · Ladrillos correr+bici · Intervalos en ambas disciplinas · Simular transición T1</p></div></div>
+    </div>
+
+    <div class="month-row">
+      <span class="mr-label">Oct</span>
+      <div class="mr-spine"><div class="mr-dot du"></div><div class="mr-line"></div></div>
+      <div class="mr-content"><div class="month-card du-c"><p class="mc-title" style="color:var(--blue)">🚴 Duatlón Texcoco — octubre</p><p class="mc-items">Correr + Bici + Correr · Segundo gran evento del año</p></div></div>
+    </div>
+
+    <div class="month-row">
+      <span class="mr-label">Nov–Dic</span>
+      <div class="mr-spine"><div class="mr-dot"></div></div>
+      <div class="mr-content"><div class="month-card"><p class="mc-title">Mantenimiento + reset</p><p class="mc-items">Entrenar por placer · Evaluar el año · Planear 2027</p></div></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FUERZA -->
+<section id="fuerza">
+  <p class="sec-label">Fuerza y calistenia</p>
+  <h2 class="sec-title">El entrenamiento invisible</h2>
+  <p class="sec-desc">Previene lesiones y complementa la carrera. Dos bloques según el día.</p>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="sw('fuerza','manana',this)">Mañana (pre-run)</button>
+    <button class="tab-btn" onclick="sw('fuerza','completo',this)">Día de fuerza</button>
+    <button class="tab-btn" onclick="sw('fuerza','duatlon',this)">Fase duatlón</button>
+  </div>
+
+  <div class="tab-pane active" id="fuerza-manana">
+    <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">Activación 20–25 min antes de salir a correr. Ligero, sin fatiga profunda.</p>
+    <div class="str-grid">
+      <div class="str-card">
+        <div class="sc-head"><span class="sc-icon">🦵</span><div><p class="sc-title">Piernas</p><p class="sc-sub">activación</p></div></div>
+        <div class="ex-list">
+          <div class="ex-item"><span class="ex-name">Sentadillas</span><span class="ex-sets">3 × 15</span></div>
+          <div class="ex-item"><span class="ex-name">Zancadas alternas</span><span class="ex-sets">3 × 10 c/lado</span></div>
+          <div class="ex-item"><span class="ex-name">Puente de glúteo</span><span class="ex-sets">3 × 15</span></div>
+          <div class="ex-item"><span class="ex-name">Elevación de talones</span><span class="ex-sets">2 × 20</span></div>
+        </div>
+      </div>
+      <div class="str-card">
+        <div class="sc-head"><span class="sc-icon">💪</span><div><p class="sc-title">Core + tren superior</p><p class="sc-sub">estabilidad</p></div></div>
+        <div class="ex-list">
+          <div class="ex-item"><span class="ex-name">Plancha frontal</span><span class="ex-sets">3 × 30 seg</span></div>
+          <div class="ex-item"><span class="ex-name">Plancha lateral</span><span class="ex-sets">2 × 20 seg c/lado</span></div>
+          <div class="ex-item"><span class="ex-name">Flexiones</span><span class="ex-sets">3 × 10</span></div>
+          <div class="ex-item"><span class="ex-name">Superman</span><span class="ex-sets">2 × 12</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-pane" id="fuerza-completo">
+    <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">Sesión completa 2× por semana en días sin rodada larga. 40–50 min.</p>
+    <div class="str-grid">
+      <div class="str-card">
+        <div class="sc-head"><span class="sc-icon">🏋️</span><div><p class="sc-title">Bloque A — Piernas</p><p class="sc-sub">martes o jueves</p></div></div>
+        <div class="ex-list">
+          <div class="ex-item"><span class="ex-name">Sentadilla profunda</span><span class="ex-sets">4 × 12</span></div>
+          <div class="ex-item"><span class="ex-name">Zancada con peso</span><span class="ex-sets">3 × 10 c/lado</span></div>
+          <div class="ex-item"><span class="ex-name">Peso muerto rumano</span><span class="ex-sets">3 × 12</span></div>
+          <div class="ex-item"><span class="ex-name">Sentadilla búlgara</span><span class="ex-sets">3 × 8 c/lado</span></div>
+          <div class="ex-item"><span class="ex-name">Elevación de talones</span><span class="ex-sets">3 × 20</span></div>
+        </div>
+      </div>
+      <div class="str-card">
+        <div class="sc-head"><span class="sc-icon">🤸</span><div><p class="sc-title">Bloque B — Core y superior</p><p class="sc-sub">miércoles o viernes</p></div></div>
+        <div class="ex-list">
+          <div class="ex-item"><span class="ex-name">Flexiones</span><span class="ex-sets">4 × 12</span></div>
+          <div class="ex-item"><span class="ex-name">Remo con banda</span><span class="ex-sets">3 × 12</span></div>
+          <div class="ex-item"><span class="ex-name">Plancha con elevación</span><span class="ex-sets">3 × 10 c/lado</span></div>
+          <div class="ex-item"><span class="ex-name">Bird-dog</span><span class="ex-sets">3 × 12 c/lado</span></div>
+          <div class="ex-item"><span class="ex-name">Dead bug</span><span class="ex-sets">3 × 10 c/lado</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-pane" id="fuerza-duatlon">
+    <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">Fase agosto–octubre. Potencia de piernas para bici y la segunda carrera.</p>
+    <div class="str-grid">
+      <div class="str-card">
+        <div class="sc-head"><span class="sc-icon">🚴</span><div><p class="sc-title">Potencia bici</p><p class="sc-sub">glúteos y cuádriceps</p></div></div>
+        <div class="ex-list">
+          <div class="ex-item"><span class="ex-name">Sentadilla una pierna</span><span class="ex-sets">4 × 8 c/lado</span></div>
+          <div class="ex-item"><span class="ex-name">Hip thrust</span><span class="ex-sets">4 × 12</span></div>
+          <div class="ex-item"><span class="ex-name">Step-up con rodilla alta</span><span class="ex-sets">3 × 10 c/lado</span></div>
+          <div class="ex-item"><span class="ex-name">Plancha dinámica</span><span class="ex-sets">3 × 45 seg</span></div>
+        </div>
+      </div>
+      <div class="str-card">
+        <div class="sc-head"><span class="sc-icon">🔁</span><div><p class="sc-title">Ladrillo (brick)</p><p class="sc-sub">simulacro duatlón</p></div></div>
+        <div class="ex-list">
+          <div class="ex-item"><span class="ex-name">Bici 30–40 min</span><span class="ex-sets">ritmo carrera</span></div>
+          <div class="ex-item"><span class="ex-name">Transición rápida</span><span class="ex-sets">&lt; 2 min</span></div>
+          <div class="ex-item"><span class="ex-name">Correr 10–15 min</span><span class="ex-sets">piernas pesadas</span></div>
+          <div class="ex-item"><span class="ex-name">Frecuencia</span><span class="ex-sets">1×/semana desde ago</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NUTRICIÓN -->
+<section id="nutricion">
+  <p class="sec-label">Nutrición</p>
+  <h2 class="sec-title">Come para rendir</h2>
+  <p class="sec-desc">Con lo que ya compras, adaptado a cada tipo de día.</p>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="sw('food','descanso',this)">Descanso</button>
+    <button class="tab-btn" onclick="sw('food','velocidad',this)">Velocidad</button>
+    <button class="tab-btn" onclick="sw('food','longrun',this)">Long run</button>
+    <button class="tab-btn" onclick="sw('food','carrera',this)">Día de carrera</button>
+  </div>
+
+  <div class="tab-pane active" id="food-descanso">
+    <div class="food-grid">
+      <div class="food-card"><div class="fc-icon">🌅</div><p class="fc-title">Desayuno</p><p class="fc-sub">sin entrenamiento</p><div class="meal-row"><div class="mr-item"><strong>Opción A</strong>Avena + plátano + frutos rojos + café con leche</div><div class="mr-item"><strong>Opción B</strong>Yogur Chobani + frutos rojos + granola o barrita</div></div></div>
+      <div class="food-card"><div class="fc-icon">☀️</div><p class="fc-title">Comida y cena</p><p class="fc-sub">día de descanso</p><div class="meal-row"><div class="mr-item"><strong>Comida</strong>Pollo o atún + verduras + arroz o pasta + jitomate</div><div class="mr-item"><strong>Snack</strong>Rice cake con peanut butter + mermelada</div><div class="mr-item"><strong>Cena</strong>Huevo (2) + papa + verduras de lata + queso</div></div></div>
+    </div>
+  </div>
+
+  <div class="tab-pane" id="food-velocidad">
+    <div class="food-grid">
+      <div class="food-card"><div class="fc-icon">⚡</div><p class="fc-title">Antes</p><p class="fc-sub">2h pre-entrenamiento</p><div class="meal-row"><div class="mr-item"><strong>Desayuno (2h antes)</strong>Avena + plátano + café. Sin huevo con jamón — muy pesado.</div><div class="mr-item"><strong>30 min antes</strong>Plátano o barrita si necesitas energía extra</div></div></div>
+      <div class="food-card"><div class="fc-icon">🔄</div><p class="fc-title">Después</p><p class="fc-sub">recuperación</p><div class="meal-row"><div class="mr-item"><strong>Dentro de 30 min</strong>Yogur Chobani + frutos rojos + rice cake</div><div class="mr-item"><strong>Cena</strong>Pollo o carne molida + pasta + jitomate + queso</div></div></div>
+    </div>
+  </div>
+
+  <div class="tab-pane" id="food-longrun">
+    <div class="food-grid">
+      <div class="food-card"><div class="fc-icon">🌙</div><p class="fc-title">Noche anterior</p><p class="fc-sub">carga de carbos</p><div class="meal-row"><div class="mr-item"><strong>Cena del sábado</strong>Pasta con pollo o carne molida + jitomate + queso. Porción generosa.</div></div></div>
+      <div class="food-card hl"><div class="fc-icon">⭐</div><p class="fc-title">Día del long run</p><p class="fc-sub">domingos</p><div class="meal-row"><div class="mr-item"><strong>2h antes</strong>Avena + plátano + café. Lo mismo de siempre.</div><div class="mr-item"><strong>Durante (km 10+)</strong>Plátano o gel. Hidratación constante.</div><div class="mr-item"><strong>Dentro de 30 min post-run</strong>Yogur Chobani + frutos rojos. Urgente.</div><div class="mr-item"><strong>Comida del día</strong>Carne molida + papa + verduras. Grande.</div></div></div>
+    </div>
+  </div>
+
+  <div class="tab-pane" id="food-carrera">
+    <div class="food-grid">
+      <div class="food-card hl"><div class="fc-icon">🏅</div><p class="fc-title">Maratón — 12 jul</p><p class="fc-sub">regla: nada nuevo</p><div class="meal-row"><div class="mr-item"><strong>Sábado noche</strong>Pasta + pollo. Duerme temprano.</div><div class="mr-item"><strong>2–2.5h antes</strong>Avena + plátano + café. Igual que tus long runs.</div><div class="mr-item"><strong>30 min antes</strong>Plátano o barrita.</div><div class="mr-item"><strong>Post-meta</strong>Plátano + yogur. Luego celebra 🎉</div></div></div>
+      <div class="food-card" style="border-color:rgba(91,143,255,.3);background:rgba(91,143,255,.04);"><div class="fc-icon">🚴</div><p class="fc-title">Duatlón — octubre</p><p class="fc-sub">correr + bici + correr</p><div class="meal-row"><div class="mr-item"><strong>Noche anterior</strong>Pasta o arroz con pollo. No proteína pesada.</div><div class="mr-item"><strong>2h antes</strong>Avena + plátano + café.</div><div class="mr-item"><strong>Durante la bici</strong>Barrita o plátano en el bolsillo del jersey.</div><div class="mr-item"><strong>Post-carrera</strong>Yogur + fruta + hidratación inmediata.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PROGRESO -->
+<section id="progreso">
+  <p class="sec-label">Progreso y logros</p>
+  <h2 class="sec-title">Lo que llevas, lo que falta</h2>
+  <p class="sec-desc">Toca cada logro para marcarlo como completado.</p>
+
+  <div class="stats-grid">
+    <div class="stat-card"><p class="sn">89</p><p class="sl">km este año</p><p class="ss">2 cuentas Strava</p></div>
+    <div class="stat-card"><p class="sn">166</p><p class="sl">km histórico</p><p class="ss">todos los tiempos</p></div>
+    <div class="stat-card"><p class="sn" id="logros-count">0</p><p class="sl">logros</p><p class="ss">de <span id="total-logros">8</span> este año</p></div>
+    <div class="stat-card"><p class="sn">47</p><p class="sl">carreras totales</p><p class="ss">acumuladas</p></div>
+    <div class="stat-card"><p class="sn" id="dias-next">—</p><p class="sl">días al próximo</p><p class="ss" id="next-name">—</p></div>
+    <div class="stat-card"><p class="sn">6</p><p class="sl">km prom/semana</p><p class="ss">histórico Strava</p></div>
+  </div>
+
+  <div class="logros-list" id="logros-list"></div>
+</section>
+
+<!-- TIPS -->
+<section id="tips">
+  <p class="sec-label">Notas de estilo de vida</p>
+  <h2 class="sec-title">Lo que no está en el plan</h2>
+  <div class="tips-grid">
+    <div class="tip-card"><p class="tip-label">Ansiedad para salir</p><p class="tip-text">Un ritual fijo baja el umbral. Las 6:00 am no son negociables. Calzado puesto = compromiso hecho. La ansiedad cede cuando el cuerpo sabe qué esperar.</p></div>
+    <div class="tip-card"><p class="tip-label">Estómago sensible</p><p class="tip-text">Nada pesado antes de correr. Avena + plátano es tu desayuno pre-run. Si el baño ataca, espera 2.5h desde la última comida grande.</p></div>
+    <div class="tip-card"><p class="tip-label">Sueño y recuperación</p><p class="tip-text">Despiertas a las 4:30, necesitas dormir antes de las 10pm. Noches de campo muy tarde: evalúa recortar el entreno del día siguiente antes de cancelarlo.</p></div>
+    <div class="tip-card"><p class="tip-label">Transición al duatlón</p><p class="tip-text">Desde agosto incorpora ladrillos (bici + correr seguidos). Las piernas después de la bici se sienten raras — necesitas practicarlo antes de Texcoco.</p></div>
+    <div class="tip-card"><p class="tip-label">Hidratación en CDMX</p><p class="tip-text">A 2,240m de altitud te deshidratas más rápido. Agua al despertar, antes de salir y al volver. En long runs y duatlón planea dónde recargar.</p></div>
+    <div class="tip-card" style="border-color:rgba(240,112,64,.3);"><p class="tip-label" style="color:var(--accent)">La regla de oro</p><p class="tip-text">Nada nuevo el día de carrera. Ni ropa, ni comida, ni recorrido. Solo lo que ya probaste en entrenamiento.</p></div>
+  </div>
+</section>
+
+<footer>
+  <span class="fl">Actualizado jun 2026 · 89 km acumulados</span>
+  <span class="fr">Tu 2026 🧡</span>
+</footer>
+
+<!-- EDIT BAR -->
+<div class="edit-bar" id="edit-bar">
+  <div class="edit-hint" id="edit-hint">Toca cualquier texto para editarlo. Los cambios se guardan automáticamente.</div>
+  <button class="edit-save" id="edit-save" onclick="saveEdits()">✓ Guardado</button>
+  <button class="edit-toggle" id="edit-toggle" onclick="toggleEdit()">✏️ Editar página</button>
+</div>
+
+<script>
+// TABS
+function sw(group, id, btn) {
+  const sec = btn.closest('section');
+  sec.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  sec.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById(group + '-' + id);
+  if(pane) pane.classList.add('active');
+  btn.classList.add('active');
+}
+
+// EDIT MODE
+let editMode = false;
+const editables = [];
+
+function toggleEdit() {
+  editMode = !editMode;
+  const btn = document.getElementById('edit-toggle');
+  const hint = document.getElementById('edit-hint');
+  const save = document.getElementById('edit-save');
+
+  if(editMode) {
+    // Make text elements editable
+    document.querySelectorAll('.nm, .ds, .mc-title, .mc-items, .tip-text, .sec-title, .sec-desc, .hero-subtitle, .fc-title, .fc-sub, .sc-title, .sc-sub, .ex-name, .ex-sets, .mr-item, .lbl, .ps-sub, .sn').forEach(el => {
+      el.contentEditable = 'true';
+      editables.push(el);
+    });
+    btn.textContent = '✕ Salir de edición';
+    btn.style.background = 'var(--muted)';
+    hint.classList.add('show');
+    save.classList.add('show');
+  } else {
+    editables.forEach(el => { el.contentEditable = 'false'; });
+    btn.innerHTML = '✏️ Editar página';
+    btn.style.background = 'var(--accent)';
+    hint.classList.remove('show');
+    save.classList.remove('show');
+    saveEdits();
+  }
+}
+
+function saveEdits() {
+  // Save all editable content to localStorage
+  const data = {};
+  document.querySelectorAll('[contenteditable]').forEach((el, i) => {
+    if(!el.id) el.id = 'ce-' + i;
+    data[el.id] = el.innerHTML;
+  });
+  localStorage.setItem('page2026edits', JSON.stringify(data));
+  const save = document.getElementById('edit-save');
+  save.textContent = '✓ Guardado';
+  setTimeout(() => { if(editMode) save.textContent = '✓ Guardar cambios'; }, 1500);
+}
+
+function loadEdits() {
+  try {
+    const data = JSON.parse(localStorage.getItem('page2026edits') || '{}');
+    Object.entries(data).forEach(([id, html]) => {
+      const el = document.getElementById(id);
+      if(el) el.innerHTML = html;
+    });
+  } catch(e) {}
+}
+loadEdits();
+
+// LOGROS
+const logros = [
+  {id:'lg1', name:'Completar long run 16 km', sub:'Domingo 28 de junio', tag:'maratón'},
+  {id:'lg2', name:'Cruzar la meta del Medio Maratón CDMX', sub:'12 de julio, 2026', tag:'maratón'},
+  {id:'lg3', name:'Primera rodada en bici post-maratón', sub:'Julio–agosto', tag:'duatlón'},
+  {id:'lg4', name:'Primer ladrillo bici + correr', sub:'Agosto', tag:'duatlón'},
+  {id:'lg5', name:'21 días consecutivos de hábito matutino', sub:'4:30 am sin falta', tag:'hábito'},
+  {id:'lg6', name:'4 semanas de fuerza completa', sub:'2× por semana', tag:'fuerza'},
+  {id:'lg7', name:'Duatlón de Texcoco completado', sub:'Octubre 2026', tag:'duatlón'},
+  {id:'lg8', name:'Superar 100 km en un mes', sub:'Nuevo récord personal', tag:'carrera'},
+];
+
+const saved = JSON.parse(localStorage.getItem('logros2026') || '{}');
+logros.forEach(l => { if(saved[l.id]) l.done = true; else l.done = false; });
+
+function renderLogros() {
+  const list = document.getElementById('logros-list');
+  list.innerHTML = logros.map(l => `
+    <div class="logro-item" onclick="toggleLogro('${l.id}')">
+      <div class="logro-check ${l.done?'done':''}" id="chk-${l.id}">
+        <svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg>
+      </div>
+      <div class="logro-text">
+        <p class="ltn" style="${l.done?'text-decoration:line-through;color:var(--muted)':''}">${l.name}</p>
+        <p class="lts">${l.sub}</p>
+      </div>
+      <span class="logro-tag">${l.tag}</span>
+    </div>
+  `).join('');
+  const done = logros.filter(l=>l.done).length;
+  document.getElementById('logros-count').textContent = done;
+  document.getElementById('total-logros').textContent = logros.length;
+}
+
+function toggleLogro(id) {
+  const l = logros.find(x=>x.id===id);
+  if(l) {
+    l.done = !l.done;
+    const s = JSON.parse(localStorage.getItem('logros2026') || '{}');
+    if(l.done) s[id] = true; else delete s[id];
+    localStorage.setItem('logros2026', JSON.stringify(s));
+    renderLogros();
+  }
+}
+renderLogros();
+
+// COUNTDOWN
+function updateCountdown() {
+  const now = new Date();
+  const marathon = new Date('2026-07-12T07:00:00');
+  const duathlon = new Date('2026-10-15T07:00:00');
+  const startYear = new Date('2026-01-01');
+  const endYear = new Date('2026-12-31');
+
+  const yearPct = Math.min(100,((now-startYear)/(endYear-startYear))*100);
+  const fill = document.getElementById('year-fill');
+  if(fill) fill.style.width = yearPct.toFixed(1)+'%';
+
+  let nextEvent, nextName;
+  if(now < marathon){ nextEvent=marathon; nextName='Medio Maratón CDMX'; }
+  else { nextEvent=duathlon; nextName='Duatlón Texcoco'; }
+
+  const diff = nextEvent - now;
+  if(diff > 0) {
+    const d = Math.floor(diff/(1000*60*60*24));
+    const h = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+    const m = Math.floor((diff%(1000*60*60))/(1000*60));
+    const nav = document.getElementById('countdown-nav');
+    if(nav) nav.textContent = d+'d '+h+'h '+m+'m';
+    const dh = document.getElementById('dias-hero');
+    if(dh) dh.textContent = d;
+    const dn = document.getElementById('dias-next');
+    if(dn) dn.textContent = d;
+    const nn = document.getElementById('next-name');
+    if(nn) nn.textContent = nextName;
+  } else {
+    const nav = document.getElementById('countdown-nav');
+    if(nav) nav.textContent = '¡A correr!';
+  }
+}
+updateCountdown();
+setInterval(updateCountdown, 30000);
+</script>
+</body>
+</html>
