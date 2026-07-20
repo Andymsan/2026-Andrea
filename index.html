@@ -982,11 +982,57 @@ function tick(){
 }
 tick();setInterval(tick,30000);
 
-// ── STORAGE ──
-const get=(k)=>JSON.parse(localStorage.getItem(k)||'[]');
-const set=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+// ── SUPABASE ──
+const SURL = 'https://omwkshxfllhdopyggpmw.supabase.co';
+const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9td2tzaHhmbGxoZG9weWdncG13Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1Nzc4OTYsImV4cCI6MjEwMDE1Mzg5Nn0.5nxMEGozzkt9uYGpJYk-RSm1VXiVjlnM87VXm7agstI';
+
+async function sbGet(table) {
+  const r = await fetch(`${SURL}/rest/v1/${table}?order=created_at.desc&limit=200`, {
+    headers: {'apikey': SKEY, 'Authorization': 'Bearer ' + SKEY}
+  });
+  return r.ok ? r.json() : [];
+}
+
+async function sbUpsert(table, data) {
+  await fetch(`${SURL}/rest/v1/${table}`, {
+    method: 'POST',
+    headers: {'apikey': SKEY, 'Authorization': 'Bearer ' + SKEY,
+      'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates'},
+    body: JSON.stringify(Array.isArray(data) ? data : [data])
+  });
+}
+
+async function sbDelete(table, id, col='id') {
+  await fetch(`${SURL}/rest/v1/${table}?${col}=eq.${id}`, {
+    method: 'DELETE',
+    headers: {'apikey': SKEY, 'Authorization': 'Bearer ' + SKEY}
+  });
+}
+
+// localStorage fallback helpers (used for plan done marks locally too)
+const getL=(k)=>JSON.parse(localStorage.getItem(k)||'[]');
+const setL=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
 const getObj=(k)=>JSON.parse(localStorage.getItem(k)||'{}');
 const setObj=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+
+// Compat shim so old code still works during transition
+const get=(k)=>getL(k);
+const set=(k,v)=>setL(k,v);
+
+// Sync indicator
+function showSync(msg, ok=true) {
+  let el = document.getElementById('sync-indicator');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'sync-indicator';
+    el.style.cssText = 'position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#1a1814;color:#fff;font-family:var(--fm);font-size:10px;padding:6px 14px;border-radius:20px;z-index:999;transition:opacity .4s;letter-spacing:.04em;';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.background = ok ? '#2d9065' : '#e85d20';
+  el.style.opacity = '1';
+  setTimeout(() => { el.style.opacity = '0'; }, 2000);
+}
 
 // ── REGISTRO ──
 document.getElementById('reg-fecha').value=new Date().toISOString().split('T')[0];
