@@ -11,7 +11,7 @@
  --bg:#faf8f4;--s1:#ffffff;--s2:#f4f1eb;--s3:#ede9e0;
  --b:rgba(0,0,0,.07);--bb:rgba(0,0,0,.13);--bh:rgba(0,0,0,.2);
  --t:#1a1814;--m:#8a8680;--ml:#6b6762;
- --o:#e85d20;--g:#2d9065;--bl:#3b6fd4;--y:#d4900a;--p:#7c4fd4;--pk:#d4507a;
+ --o:#e85d20;--g:#2d9065;--bl:#3b6fd4;--y:#d4900a;--p:#7c4fd4;--pk:#d4507a;--sw:#22a0c8;
  --sidebar:220px;
  --fd:'Urbanist',sans-serif;--fb:'Poppins',sans-serif;--fm:'DM Mono',monospace;
 }
@@ -354,6 +354,10 @@ body{background:var(--bg);color:var(--t);font-family:var(--fb);font-size:15px;li
 .page { display: block !important; }
 .page + .page { border-top: 1px solid var(--b); }
 .main { overflow-y: auto; scroll-behavior: smooth; }
+
+.ri-ic.swim{background:rgba(34,160,200,.14);}
+.wvp-swim{background:rgba(34,160,200,.15);color:#22a0c8;}
+.wkb.swim{background:rgba(34,160,200,.15);color:#22a0c8;}
 </style>
 </head>
 <body>
@@ -380,7 +384,11 @@ body{background:var(--bg);color:var(--t);font-family:var(--fb);font-size:15px;li
  <div class="sb-section">Entrenamiento</div>
  <button class="sb-item" onclick="goTo('plan',this)"><span class="icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg></span><span class="lbl">Plan maratón</span></button>
  <button class="sb-item" onclick="goTo('duatlon',this)"><span class="icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="4" cy="11" r="2.5"/><circle cx="12" cy="11" r="2.5"/><path d="M6.5 11H9.5M8 4l-2 4h4"/></svg></span><span class="lbl">Plan duatlón</span></button>
- <button class="sb-item" onclick="goTo('fuerza',this)"><span class="icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8h2M12 8h2M4 8h8"/><circle cx="3" cy="8" r="1.5"/><circle cx="13" cy="8" r="1.5"/></svg></span><span class="lbl">Fuerza</span></button>
+ <button class="sb-item" onclick="goTo('natacion',this)">
+        <span class="icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 10c1-1.5 3-1.5 4 0s3 1.5 4 0 3-1.5 4 0"/><path d="M4 6l3-3 3 3"/><circle cx="7" cy="3" r="1"/></svg></span>
+        <span class="lbl">Natacion</span>
+      </button>
+      <button class="sb-item" onclick="goTo('fuerza',this)"><span class="icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8h2M12 8h2M4 8h8"/><circle cx="3" cy="8" r="1.5"/><circle cx="13" cy="8" r="1.5"/></svg></span><span class="lbl">Fuerza</span></button>
 
  <div class="sb-section">Bienestar</div>
  <button class="sb-item" onclick="goTo('nutricion',this)"><span class="icon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2c-3 0-5 2-5 5 0 4 5 7 5 7s5-3 5-7c0-3-2-5-5-5z"/></svg></span><span class="lbl">Nutrición</span></button>
@@ -433,6 +441,7 @@ body{background:var(--bg);color:var(--t);font-family:var(--fb);font-size:15px;li
  <option value="str">+ Fuerza</option>
  <option value="brick"> Ladrillo (bici+run)</option>
  <option value="walk">Caminata</option>
+          <option value="swim">Natacion</option>
  </select>
  </div>
  </div>
@@ -500,6 +509,7 @@ body{background:var(--bg);color:var(--t);font-family:var(--fb);font-size:15px;li
  <div class="cl-i"><span class="cdot" style="background:var(--o)"></span>Carrera</div>
  <div class="cl-i"><span class="cdot" style="background:var(--bl)"></span>Bici</div>
  <div class="cl-i"><span class="cdot" style="background:var(--p)"></span>Fuerza</div>
+    <div class="cl-i"><span class="cdot" style="background:var(--sw)"></span>Natacion</div>
  <div class="cl-i" style="color:var(--g);">✓ Completado</div>
  <div class="cl-i" style="color:var(--o);">★ Carrera</div>
  </div>
@@ -604,6 +614,93 @@ body{background:var(--bg);color:var(--t);font-family:var(--fb);font-size:15px;li
  <div class="tp" id="du-f4">
  <div style="display:inline-block;font-family:var(--fm);font-size:9px;padding:3px 10px;border-radius:3px;background:rgba(232,184,75,.14);color:var(--y);letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px;">Taper — 2 semanas antes</div>
  <div class="wk-acc" id="wk-f4"></div>
+ </div>
+</div>
+
+<!-- NATACIÓN -->
+<div class="page" id="page-natacion">
+ <div class="page-head"><p class="eyebrow">Natacion</p><h2 class="page-title">Entrenamiento en agua</h2></div>
+
+ <!-- Stats rápidas -->
+ <div class="card-grid c3" id="swim-kpis" style="margin-bottom:20px;">
+   <div class="card"><p style="font-family:var(--fm);font-size:18px;font-weight:500;" id="sw-sesiones">0</p><p style="font-size:9px;color:var(--m);text-transform:uppercase;letter-spacing:.05em;">sesiones</p></div>
+   <div class="card"><p style="font-family:var(--fm);font-size:18px;font-weight:500;" id="sw-km">0</p><p style="font-size:9px;color:var(--m);text-transform:uppercase;letter-spacing:.05em;">km totales</p></div>
+   <div class="card"><p style="font-family:var(--fm);font-size:18px;font-weight:500;" id="sw-largos">0</p><p style="font-size:9px;color:var(--m);text-transform:uppercase;letter-spacing:.05em;">largos totales</p></div>
+ </div>
+
+ <!-- Tabs -->
+ <div class="tabs">
+   <button class="tb on" onclick="sw('sw','historial',this);renderSwim()">Historial</button>
+   <button class="tb" onclick="sw('sw','plan',this)">Plan de entrenamiento</button>
+   <button class="tb" onclick="sw('sw','tecnica',this)">Tecnica y metricas</button>
+ </div>
+
+ <!-- HISTORIAL -->
+ <div class="tp on" id="sw-historial">
+   <div id="swim-list" style="display:flex;flex-direction:column;gap:6px;">
+     <p style="font-size:11px;color:var(--m);">Cargando...</p>
+   </div>
+ </div>
+
+ <!-- PLAN -->
+ <div class="tp" id="sw-plan">
+   <p style="font-size:12px;color:var(--m);margin-bottom:16px;line-height:1.7;">Plan progresivo de 8 semanas para construir base en agua. Empieza donde puedas — sin presion.</p>
+
+   <div style="display:flex;flex-direction:column;gap:8px;">
+     <div class="card"><p style="font-family:var(--fm);font-size:9px;color:var(--sw);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">SEM 1–2 — Adaptacion</p>
+       <p style="font-size:12px;color:var(--t);line-height:1.8;">2× por semana · 20–25 min por sesion<br>
+       Series: 4×25m descanso 30 seg · luego 4×50m descanso 45 seg<br>
+       Enfoque: respiracion ritmica, no velocidad</p></div>
+     <div class="card"><p style="font-family:var(--fm);font-size:9px;color:var(--sw);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">SEM 3–4 — Construccion</p>
+       <p style="font-size:12px;color:var(--t);line-height:1.8;">2× por semana · 30 min<br>
+       Series: 6×50m descanso 30 seg · 2×100m descanso 60 seg<br>
+       Enfoque: stroke count (contar brazadas por largo)</p></div>
+     <div class="card"><p style="font-family:var(--fm);font-size:9px;color:var(--sw);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">SEM 5–6 — Resistencia</p>
+       <p style="font-size:12px;color:var(--t);line-height:1.8;">2–3× por semana · 35–40 min<br>
+       Series: 400m continuo · 4×100m descanso 45 seg<br>
+       Enfoque: mantener ritmo constante, bajar swolf</p></div>
+     <div class="card"><p style="font-family:var(--fm);font-size:9px;color:var(--sw);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">SEM 7–8 — Consolidacion</p>
+       <p style="font-size:12px;color:var(--t);line-height:1.8;">3× por semana · 40–45 min<br>
+       Series: 800m continuo · 6×50m sprint · 200m vuelta a la calma<br>
+       Enfoque: ritmo por 100m consistente</p></div>
+   </div>
+
+   <div style="background:rgba(34,160,200,.06);border:.5px solid rgba(34,160,200,.3);border-radius:10px;padding:14px;margin-top:14px;">
+     <p style="font-family:var(--fm);font-size:9px;color:var(--sw);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">Nutricion para nadar · 73 kg · 1.67 m</p>
+     <p style="font-size:12px;color:var(--t);line-height:1.8;">
+       El agua fria suprime el hambre pero el gasto es real (~400–600 kcal/hora).<br>
+       <strong>Antes (1.5h):</strong> avena + platano + cafe. Igual que para correr.<br>
+       <strong>Despues (30 min):</strong> yogur Chobani + frutos rojos + algo salado (el agua te quita sodio).<br>
+       <strong>Hidratacion:</strong> toma agua antes y despues — en alberca no sientes la sed.
+     </p>
+   </div>
+ </div>
+
+ <!-- TECNICA -->
+ <div class="tp" id="sw-tecnica">
+   <div class="card-grid c2" style="margin-bottom:14px;">
+     <div class="card">
+       <p style="font-family:var(--fm);font-size:9px;color:var(--m);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px;">Swolf — que es</p>
+       <p style="font-size:12px;color:var(--t);line-height:1.7;">Swolf = segundos por largo + brazadas por largo. Numero menor = mas eficiente. Objetivo inicial: bajar de 45 en 25m.</p>
+     </div>
+     <div class="card">
+       <p style="font-family:var(--fm);font-size:9px;color:var(--m);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px;">Brazadas por largo</p>
+       <p style="font-size:12px;color:var(--t);line-height:1.7;">Principiante: 22–26 brazadas en 25m. Objetivo intermedio: 18–20. Menos brazadas = mejor deslizamiento.</p>
+     </div>
+     <div class="card">
+       <p style="font-family:var(--fm);font-size:9px;color:var(--m);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px;">Ritmo objetivo /100m</p>
+       <p style="font-size:12px;color:var(--t);line-height:1.7;">Inicio comodo: 2:30–3:00 /100m. Meta en 8 semanas: 2:10–2:20 /100m. Tu sesion de Garmin mostro 82–83 ppm de FC.</p>
+     </div>
+     <div class="card">
+       <p style="font-family:var(--fm);font-size:9px;color:var(--m);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px;">Ejercicios clave</p>
+       <div style="display:flex;flex-direction:column;gap:3px;margin-top:4px;">
+         <div style="display:flex;justify-content:space-between;padding:5px 8px;background:var(--s2);border-radius:4px;font-size:11px;"><span>Patada de tabla</span><span style="font-family:var(--fm);font-size:9px;color:var(--m);">4×25m</span></div>
+         <div style="display:flex;justify-content:space-between;padding:5px 8px;background:var(--s2);border-radius:4px;font-size:11px;"><span>Catch-up drill</span><span style="font-family:var(--fm);font-size:9px;color:var(--m);">4×25m</span></div>
+         <div style="display:flex;justify-content:space-between;padding:5px 8px;background:var(--s2);border-radius:4px;font-size:11px;"><span>Nadar con un brazo</span><span style="font-family:var(--fm);font-size:9px;color:var(--m);">2×25m c/lado</span></div>
+         <div style="display:flex;justify-content:space-between;padding:5px 8px;background:var(--s2);border-radius:4px;font-size:11px;"><span>Contar brazadas</span><span style="font-family:var(--fm);font-size:9px;color:var(--m);">cada largo</span></div>
+       </div>
+     </div>
+   </div>
  </div>
 </div>
 
@@ -1070,6 +1167,18 @@ function guardarRegistro(){
  limpiarRegistro();renderRecent();updateStats();
 }
 
+// Show/hide swim fields
+document.getElementById('reg-tipo').addEventListener('change', function(){
+  const sf = document.getElementById('swim-fields');
+  sf.style.display = this.value === 'swim' ? 'block' : 'none';
+  const ritmoLabel = document.querySelector('label[for="reg-ritmo"]') || 
+    document.querySelector('.fg label');
+  // Also swap ritmo placeholder
+  const ritmoInput = document.getElementById('reg-ritmo');
+  if(ritmoInput) ritmoInput.placeholder = this.value==='swim' ? 'ej: 2:10 /100m' : 
+    this.value==='bike' ? 'ej: 18 km/h' : 'ej: 6:10 min/km';
+});
+
 function limpiarRegistro(){
  ['reg-dist','reg-tiempo','reg-ritmo','reg-peso','reg-fc','reg-rpe','reg-notas'].forEach(id=>document.getElementById(id).value='');
 }
@@ -1077,7 +1186,7 @@ function limpiarRegistro(){
 function renderRecent(){
  const reg=get('reg26');
  const icons={run:'/',bike:'o',str:'+',brick:'',walk:''};
- const cls={run:'run',bike:'bike',str:'str',brick:'brick',walk:'run'};
+ const cls={run:'run',bike:'bike',str:'str',brick:'brick',walk:'run',swim:'swim'};
  const list=document.getElementById('recent-list');
  if(!list)return;
  if(!reg.length){list.innerHTML='<p style="font-size:11px;color:var(--m);padding:10px 0;">Sin entrenamientos aún. ¡Registra el primero!</p>';return;}
@@ -1225,9 +1334,9 @@ function renderCharts(){
  const allD=reg.filter(r=>r.dist>0);
  const ctxD=document.getElementById('ch-dist');
  if(ctxD){if(chD)chD.destroy();
- const colors={run:'rgba(240,112,64,.7)',bike:'rgba(91,143,255,.7)',str:'rgba(176,127,255,.7)',brick:'rgba(232,184,75,.7)',walk:'rgba(92,90,86,.5)'};
+ const colors={run:'rgba(232,93,32,.7)',bike:'rgba(59,111,212,.7)',str:'rgba(124,79,212,.7)',brick:'rgba(212,144,10,.7)',walk:'rgba(92,90,86,.5)',swim:'rgba(34,160,200,.7)'};
  chD=new Chart(ctxD,{type:'bar',data:{labels:allD.map(r=>r.fecha.slice(5)+' '+{run:'/',bike:'o',str:'+',brick:'',walk:''}[r.tipo]),
- datasets:[{data:allD.map(r=>r.dist),backgroundColor:allD.map(r=>colors[r.tipo]||colors.run)}]},options:{...baseOpts}});
+ datasets:[{data:allD.map(r=>r.tipo==='swim'&&r.largos&&r.metros?(r.largos*r.metros/1000):r.dist),backgroundColor:allD.map(r=>colors[r.tipo]||colors.run)}]},options:{...baseOpts}});
  const cs=document.getElementById('cs-dist');
  if(cs&&allD.length){const max=Math.max(...allD.map(r=>r.dist));cs.innerHTML=`<span class="cs">Máx: <span>${max.toFixed(1)} km</span></span><span class="cs">Total registrado: <span>${allD.reduce((a,r)=>a+r.dist,0).toFixed(1)} km</span></span>`;}
  }
@@ -1586,7 +1695,7 @@ async function importarCSV(){
   const typeMap = {
     'run':'run','running':'run','carrera':'run',
     'ride':'bike','cycling':'bike','bici':'bike','virtualride':'bike',
-    'swim':'str','swimming':'str',
+    'swim':'swim','swimming':'swim','natacion':'swim',
     'workout':'str','weighttraining':'str','fuerza':'str',
     'walk':'walk','walking':'walk','hike':'walk',
   };
@@ -1700,6 +1809,46 @@ function parseCSVLine(line){
   }
   result.push(current);
   return result;
+}
+
+
+// ── SWIM ──
+async function renderSwim(){
+  let reg = [];
+  try { reg = await sbGet('entrenamientos'); } catch(e) { reg = getL('reg26'); }
+  const swims = reg.filter(r => r.tipo === 'swim');
+  const el = id => document.getElementById(id);
+  if(el('sw-sesiones')) el('sw-sesiones').textContent = swims.length;
+  const totalKm = swims.reduce((a,r) => a + (r.dist || (r.largos&&r.metros ? r.largos*r.metros/1000 : 0)), 0);
+  if(el('sw-km')) el('sw-km').textContent = totalKm.toFixed(2);
+  const totalLargos = swims.reduce((a,r) => a + (r.largos||0), 0);
+  if(el('sw-largos')) el('sw-largos').textContent = totalLargos;
+
+  const list = document.getElementById('swim-list');
+  if(!list) return;
+  if(!swims.length){
+    list.innerHTML = '<p style="font-size:11px;color:var(--m);">Sin sesiones de natacion aun. Registra tu primera sesion en la seccion Registro.</p>';
+    return;
+  }
+  list.innerHTML = swims.map(r => `
+    <div style="background:var(--s1);border:.5px solid rgba(34,160,200,.2);border-radius:8px;padding:12px 14px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+        <div>
+          <p style="font-size:13px;font-weight:500;">${r.fecha}</p>
+          <p style="font-size:10px;color:var(--m);">${r.estilo||'libre'} ${r.notas?'· '+r.notas.replace(' (Strava)','').slice(0,40):''}</p>
+        </div>
+        <span style="font-family:var(--fm);font-size:9px;background:rgba(34,160,200,.12);color:var(--sw);padding:2px 8px;border-radius:3px;">natacion</span>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        ${r.dist||r.largos ? `<span style="font-family:var(--fm);font-size:11px;color:var(--t);">${r.dist?r.dist+' km':(r.largos&&r.metros?(r.largos*r.metros/1000).toFixed(2)+' km':'')}</span>` : ''}
+        ${r.tiempo ? `<span style="font-family:var(--fm);font-size:11px;color:var(--m);">${r.tiempo} min</span>` : ''}
+        ${r.largos ? `<span style="font-family:var(--fm);font-size:11px;color:var(--m);">${r.largos} largos${r.metros?' x'+r.metros+'m':''}</span>` : ''}
+        ${r.swolf ? `<span style="font-family:var(--fm);font-size:11px;color:var(--m);">swolf ${r.swolf}</span>` : ''}
+        ${r.brazadas ? `<span style="font-family:var(--fm);font-size:11px;color:var(--m);">${r.brazadas} braz/largo</span>` : ''}
+        ${r.fc ? `<span style="font-family:var(--fm);font-size:11px;color:var(--m);">${r.fc} ppm</span>` : ''}
+        ${r.ritmo ? `<span style="font-family:var(--fm);font-size:11px;color:var(--m);">${r.ritmo}</span>` : ''}
+      </div>
+    </div>`).join('');
 }
 
 // ── INIT ──
