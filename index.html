@@ -456,6 +456,20 @@ body{background:var(--bg);color:var(--t);font-family:var(--fb);font-size:15px;li
  <button class="btn btn-s" onclick="limpiarRegistro()">Limpiar</button>
  </div>
  </div>
+ <!-- STRAVA CSV IMPORT -->
+ <div style="background:var(--s2);border:.5px solid var(--b);border-radius:10px;padding:14px 16px;margin-bottom:16px;">
+   <p style="font-family:var(--fm);font-size:9px;color:var(--m);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px;">Importar desde Strava CSV</p>
+   <p style="font-size:11px;color:var(--m);margin-bottom:10px;line-height:1.7;">
+     En Strava ve a <strong style="color:var(--t)">Configuracion → Mi cuenta → Descargar o eliminar tus datos</strong> → "Solicitar tus archivos". Te llega un correo con un ZIP. Dentro busca <strong style="color:var(--t)">activities.csv</strong> y subelo aqui.
+   </p>
+   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+     <input type="file" id="strava-csv" accept=".csv" style="font-size:11px;color:var(--m);background:var(--s1);border:.5px solid var(--bb);border-radius:5px;padding:5px 8px;cursor:pointer;flex:1;min-width:0;">
+     <button class="btn btn-o" onclick="importarCSV()">Importar</button>
+   </div>
+   <div id="csv-status" style="font-family:var(--fm);font-size:10px;margin-top:8px;display:none;line-height:1.6;"></div>
+   <div id="csv-preview" style="margin-top:10px;display:none;max-height:200px;overflow-y:auto;"></div>
+ </div>
+
  <p style="font-family:var(--fm);font-size:9px;color:var(--m);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px;">Últimas sesiones</p>
  <div id="recent-list" class="recent-list"></div>
 </div>
@@ -1527,6 +1541,166 @@ function renderWkAcc(faseId,data){
  </div>`).join('');
 }
 renderWkAcc('f1',WKS.f1);renderWkAcc('f2',WKS.f2);renderWkAcc('f3',WKS.f3);renderWkAcc('f4',WKS.f4);
+
+// ── STRAVA CSV IMPORT ──
+async function importarCSV(){
+  const file = document.getElementById('strava-csv').files[0];
+  if(!file) return alert('Selecciona un archivo CSV primero');
+  const status = document.getElementById('csv-status');
+  const preview = document.getElementById('csv-preview');
+  status.style.display = 'block';
+  status.style.color = 'var(--m)';
+  status.textContent = 'Leyendo archivo...';
+
+  const text = await file.text();
+  const lines = text.split('\n').filter(l => l.trim());
+  if(!lines.length){ status.textContent = 'Archivo vacío o inválido.'; return; }
+
+  // Parse CSV headers
+  const headers = parseCSVLine(lines[0]).map(h => h.trim().toLowerCase()
+    .replace(/['"]/g,'').replace(/\s+/g,'_'));
+
+  // Strava CSV columns vary — map common ones
+  const idx = (names) => {
+    for(const n of names){
+      const i = headers.findIndex(h => h.includes(n));
+      if(i >= 0) return i;
+    }
+    return -1;
+  };
+
+  const iDate    = idx(['date','fecha','activity_date','start_date']);
+  const iName    = idx(['activity_name','nombre','name','titulo']);
+  const iType    = idx(['activity_type','tipo','type','sport_type']);
+  const iDist    = idx(['distance','distancia']);
+  const iTime    = idx(['elapsed_time','moving_time','tiempo','duration']);
+  const iFC      = idx(['average_heart_rate','avg_hr','fc','heart']);
+  const iElev    = idx(['elevation_gain','desnivel','elev']);
+
+  if(iDate < 0 || iType < 0){
+    status.textContent = 'No se reconoció el formato del CSV. Asegurate de usar el archivo activities.csv de Strava.';
+    status.style.color = 'var(--o)';
+    return;
+  }
+
+  const typeMap = {
+    'run':'run','running':'run','carrera':'run',
+    'ride':'bike','cycling':'bike','bici':'bike','virtualride':'bike',
+    'swim':'str','swimming':'str',
+    'workout':'str','weighttraining':'str','fuerza':'str',
+    'walk':'walk','walking':'walk','hike':'walk',
+  };
+
+  const registros = [];
+  const skipped = [];
+
+  for(let i = 1; i < lines.length; i++){
+    if(!lines[i].trim()) continue;
+    const cols = parseCSVLine(lines[i]);
+    if(cols.length < 3) continue;
+
+    const rawType = (cols[iType]||'').trim().toLowerCase().replace(/\s+/g,'');
+    const tipo = typeMap[rawType] || 'run';
+
+    const rawDate = (cols[iDate]||'').trim().replace(/['"]/g,'');
+    // Parse date — Strava uses "Jan 1, 2026, 6:00:00 AM" or "2026-01-01"
+    let fecha = '';
+    try {
+      const d = new Date(rawDate);
+      if(!isNaN(d)){
+        fecha = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      }
+    } catch(e){}
+    if(!fecha){ skipped.push(i); continue; }
+
+    const rawDist = parseFloat((cols[iDist]||'0').replace(/['"]/g,'')) || 0;
+    // Strava distance is in meters if raw > 1000, else km
+    const dist = rawDist > 500 ? parseFloat((rawDist/1000).toFixed(2)) : rawDist;
+
+    const rawTime = parseFloat((cols[iTime]||'0').replace(/['"]/g,'')) || 0;
+    // Strava time in seconds
+    const tiempo = rawTime > 300 ? Math.round(rawTime/60) : rawTime;
+
+    const fc = iFC >= 0 ? parseInt(cols[iFC]||'0') : 0;
+
+    registros.push({
+      id: Date.now() + i,
+      fecha, tipo, dist,
+      tiempo: tiempo || 0,
+      ritmo: '', peso: 0,
+      fc: fc || 0, rpe: 0,
+      notas: (cols[iName]||'').replace(/['"]/g,'').trim() + ' (Strava)'
+    });
+  }
+
+  if(!registros.length){
+    status.textContent = 'No se encontraron actividades válidas en el archivo.';
+    status.style.color = 'var(--o)';
+    return;
+  }
+
+  status.textContent = `Encontradas ${registros.length} actividades. Subiendo a Supabase...`;
+
+  // Upload in batches of 50
+  let ok = 0, fail = 0;
+  for(let i = 0; i < registros.length; i += 50){
+    const batch = registros.slice(i, i+50);
+    try {
+      await sbUpsert('entrenamientos', batch);
+      ok += batch.length;
+      status.textContent = `Subiendo... ${ok}/${registros.length}`;
+    } catch(e){ fail += batch.length; }
+  }
+
+  // Also mark calendar days as done
+  const doneBatch = registros.map(r => ({fecha: r.fecha, done: true}));
+  try { await sbUpsert('calendario_done', doneBatch); } catch(e){}
+
+  // Update local cache
+  const local = getL('reg26');
+  const existIds = new Set(local.map(r=>r.id));
+  registros.forEach(r => { if(!existIds.has(r.id)) local.unshift(r); });
+  setL('reg26', local);
+
+  const doneObj = getObj('done26');
+  registros.forEach(r => { doneObj[r.fecha] = true; });
+  setObj('done26', doneObj);
+
+  status.style.color = ok > 0 ? 'var(--g)' : 'var(--o)';
+  status.textContent = `Listo. ${ok} actividades importadas${fail ? ', '+fail+' fallaron' : ''}${skipped.length ? ', '+skipped.length+' filas saltadas' : ''}.`;
+
+  // Show preview
+  preview.style.display = 'block';
+  preview.innerHTML = `<p style="font-family:var(--fm);font-size:9px;color:var(--m);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">Primeras actividades importadas</p>`
+    + registros.slice(0,8).map(r=>`
+    <div style="display:flex;gap:8px;padding:5px 0;border-bottom:.5px solid var(--b);font-size:11px;">
+      <span style="font-family:var(--fm);font-size:9px;color:var(--m);min-width:70px;">${r.fecha}</span>
+      <span style="font-family:var(--fm);font-size:9px;background:${r.tipo==='run'?'rgba(232,93,32,.12)':r.tipo==='bike'?'rgba(59,111,212,.12)':'rgba(176,127,255,.12)'};color:${r.tipo==='run'?'var(--o)':r.tipo==='bike'?'var(--bl)':'var(--p)'};padding:1px 6px;border-radius:3px;">${r.tipo}</span>
+      <span style="color:var(--t);">${r.dist?r.dist+' km':''} ${r.tiempo?r.tiempo+' min':''}</span>
+      <span style="color:var(--m);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.notas}</span>
+    </div>`).join('');
+
+  renderRecent();
+  renderCal();
+  renderWeek();
+}
+
+function parseCSVLine(line){
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for(let i = 0; i < line.length; i++){
+    const ch = line[i];
+    if(ch === '"'){
+      if(inQuotes && line[i+1] === '"'){ current += '"'; i++; }
+      else inQuotes = !inQuotes;
+    } else if(ch === ',' && !inQuotes){
+      result.push(current); current = '';
+    } else { current += ch; }
+  }
+  result.push(current);
+  return result;
+}
 
 // ── INIT ──
 renderRecent();updateStats();renderCal();renderWeek();renderLogros();
